@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int @id @default(autoincrement())
+  email           String @unique
+  name            String @db.VarChar(100)
+  password        String @db.VarChar(100)
+  nik             String @unique @db.VarChar(30)
+  phone           String @db.VarChar(20)
+  emergency_phone String @db.VarChar(20)
+  date_of_birth   DateTime
+  weight          Float @db.Float
+  height          Float @db.Float
+  address         String @db.VarChar(255)
+  
+  trips Trip[]
+  members Member[]
+}
+
+model Admin {
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  name      String  @db.VarChar(100)
+  password  String  @db.VarChar(100)
+  phone     String  @db.VarChar(20)
+}
+
+model Route {
+  id        Int     @id @default(autoincrement())
+  name      String  @db.VarChar(100)
+  is_open   Boolean @default(true)
+  trips     Trip[]  
+}
+
+model Trip {
+  id              Int       @id @default(autoincrement())
+  is_checked_in   Boolean   @default(false)
+  is_checked_out  Boolean   @default(false)
+  is_canceled     Boolean   @default(false)
+  date            DateTime
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  route_id        Int       
+  user_id         Int
+  route           Route     @relation(fields: [route_id], references: [id])
+  user            User      @relation(fields: [user_id], references: [id])
+  members         Member[]
+  payment         Payment?
+}
+
+model Payment {
+  id              Int       @id @default(autoincrement())
+  status          String
+  transaction_id  String
+  price           Float
+  expiration      DateTime
+  bank            String
+  va_number       String
+  trip_id         Int       @unique
+  trip            Trip      @relation(fields: [trip_id], references: [id])
+
+}
+
+model Member {
+  id      Int   @id @default(autoincrement())
+  user_id Int
+  trip_id Int
+  user    User  @relation(fields: [user_id], references: [id])
+  trip    Trip  @relation(fields: [trip_id], references: [id])
+}
