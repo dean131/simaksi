@@ -9,9 +9,8 @@ const register = async (req, res, next) => {
         const registerUserValidation = Joi.object({
             email: Joi.string().email().max(100).required(),
             password: Joi.string().max(100).required(),
+            password_confirm: Joi.string().max(100).required(),
             name: Joi.string().max(100).required(),
-            password: Joi.string().max(100).required(),
-            nik: Joi.string().max(100).required(),
             phone: Joi.string().max(20).required(),
             emergency_phone: Joi.string().max(20).required(),
             date_of_birth: Joi.date().required(),
@@ -24,6 +23,12 @@ const register = async (req, res, next) => {
         if (result.error) {
             throw new ResponseError(400, result.error.message);
         }
+        // Validasi password dan password_confirm
+        if (req.body.password !== req.body.password_confirm) {
+            throw new ResponseError(400, "Password and password_confirm not match");
+        }
+        // Menghapus password_confirm dari req.body
+        delete result.value.password_confirm;
         // Mengecek apakah email sudah terdaftar
         const countUser = await prisma.user.count({
             where: {
@@ -32,18 +37,16 @@ const register = async (req, res, next) => {
         });
         // Jika email sudah terdaftar, maka kirimkan error
         if (countUser === 1) {
-            throw new ResponseError(400, "Email telah terdaftar");
+            throw new ResponseError(400, "Email has been registered");
         }
         // Mengenkripsi password
         result.value.password = await bcrypt.hash(result.value.password, 10);
         // Menyimpan data user ke database
         const user = await  prisma.user.create({
-            data: result.value,
-            select: {
-                email: true,
-                name: true
-            }
+            data: result.value
         });
+        // Menghapus password dari user
+        delete user.password;
         // Mengirimkan data user ke client
         res.json({data: user});
     } catch (error) {
@@ -131,7 +134,6 @@ const update = async (req, res, next) => {
         const updateUserValidation = Joi.object({
             email: Joi.string().email().max(100).required(),
             name: Joi.string().max(100).required(),
-            nik: Joi.string().max(100).required(),
             phone: Joi.string().max(20).required(),
             emergency_phone: Joi.string().max(20).required(),
             date_of_birth: Joi.date().required(),

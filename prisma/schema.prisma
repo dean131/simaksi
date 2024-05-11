@@ -14,17 +14,16 @@ datasource db {
 }
 
 model User {
-  id              Int @id @default(autoincrement())
-  email           String @unique
-  name            String @db.VarChar(100)
-  password        String @db.VarChar(100)
-  nik             String @unique @db.VarChar(30)
-  phone           String @db.VarChar(20)
-  emergency_phone String @db.VarChar(20)
+  id              Int     @id @default(autoincrement())
+  email           String  @unique
+  name            String  @db.VarChar(100)
+  password        String  @db.VarChar(100)
+  phone           String  @db.VarChar(20)
+  emergency_phone String  @db.VarChar(20)
   date_of_birth   DateTime
-  weight          Float @db.Float
-  height          Float @db.Float
-  address         String @db.VarChar(255)
+  weight          Float   @db.Float
+  height          Float   @db.Float
+  address         String  @db.VarChar(255)
   
   trips Trip[]
   members Member[]
@@ -62,15 +61,15 @@ model Trip {
 }
 
 model Payment {
-  id              Int       @id @default(autoincrement())
-  status          String
+  id              Int           @id @default(autoincrement())
+  status          PaymentStatus @default(menunggu)
   transaction_id  String
   price           Float
   expiration      DateTime
   bank            String
   va_number       String
-  trip_id         Int       @unique
-  trip            Trip      @relation(fields: [trip_id], references: [id])
+  trip_id         Int           @unique
+  trip            Trip          @relation(fields: [trip_id], references: [id])
 
 }
 
@@ -80,4 +79,19 @@ model Member {
   trip_id Int
   user    User  @relation(fields: [user_id], references: [id])
   trip    Trip  @relation(fields: [trip_id], references: [id])
+}
+
+model CheckPoint {
+  id      Int     @id @default(autoincrement())
+  name    String
+  picture String
+}
+
+enum PaymentStatus {
+  menunggu
+  lunas
+  aktif
+  selesai
+  ditolak
+  batal
 }
