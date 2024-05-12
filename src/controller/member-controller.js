@@ -6,37 +6,42 @@ const create = async (req, res, next) => {
     try {
         // validasi input
         const schema = Joi.object({
-            user_id: Joi.number().required(),
-            trip_id: Joi.number().required()
+            user_id: Joi.number().required()
         });
         const result = schema.validate(req.body);
         // jika input tidak valid
         if (result.error) {
             throw new ResponseError(400, result.error.message);
         }
+        const trip = await prisma.trip.findFirst({
+            where: {
+                user_id: req.user.id,
+                is_created: false
+            }
+        });
         // membuat member baru
-        const member = await prisma.member.create({
+        await prisma.member.create({
             data: {
-                user_id: req.body.user_id,
-                trip_id: req.body.trip_id
+                user_id: result.value.user_id,
+                trip_id: trip.id
+            }
+        });
+        // mengambil semua member berdasarkan trip_id
+        const members = await prisma.member.findMany({
+            where: {
+                trip_id: trip.id
             },
             include: {
                 user: {
                     select: {
-                        email: true,
+                        id: true,
                         name: true
-                    }
-                },
-                trip: {
-                    select: {
-                        route_id: true,
-                        date: true
                     }
                 }
             }
         });
         // memberikan response
-        res.json({ data: member });
+        res.json({ data: members });
         
     } catch (error) {
         // mengirim error ke middleware error
@@ -56,16 +61,10 @@ const list = async (req, res, next) => {
                 include: {
                     user: {
                         select: {
-                            email: true,
+                            id: true,
                             name: true
                         }
                     },
-                    trip: {
-                        select: {
-                            route_id: true,
-                            date: true
-                        }
-                    }
                 }
             });
         } else {
@@ -73,16 +72,10 @@ const list = async (req, res, next) => {
                 include: {
                     user: {
                         select: {
-                            email: true,
+                            id: true,
                             name: true
                         }
                     },
-                    trip: {
-                        select: {
-                            route_id: true,
-                            date: true
-                        }
-                    }
                 }
             });
         }
@@ -97,13 +90,34 @@ const list = async (req, res, next) => {
 const remove = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id);
-        const member = await prisma.member.delete({
+        const trip = await prisma.trip.findFirst({
+            where: {
+                user_id: req.user.id,
+                is_created: false
+            }
+        });
+        // Menghapus member berdasarkan id
+        await prisma.member.delete({
             where: {
                 id: id
             }
         });
+        // mengambil semua member berdasarkan trip_id
+        const members = await prisma.member.findMany({
+            where: {
+                trip_id: trip.id
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                }
+            }
+        });
         // memberikan response
-        res.json({ data: member });
+        res.json({ data: members });
     } catch (error) {
         // mengirim error ke middleware error
         next(error);

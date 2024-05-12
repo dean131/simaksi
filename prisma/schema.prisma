@@ -40,18 +40,20 @@ model Admin {
 model Route {
   id        Int     @id @default(autoincrement())
   name      String  @db.VarChar(100)
+  price     Float   @db.Float
   is_open   Boolean @default(true)
   trips     Trip[]  
 }
 
 model Trip {
   id              Int       @id @default(autoincrement())
-  is_checked_in   Boolean   @default(false)
-  is_checked_out  Boolean   @default(false)
-  is_canceled     Boolean   @default(false)
-  date            DateTime
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  start_date      DateTime
+  end_date        DateTime
+  checked_in_at   DateTime?
+  checked_out_at  DateTime?
+  canceled_at     DateTime?
+  created_at      DateTime?
+  updated_at      DateTime  @updatedAt
   route_id        Int       
   user_id         Int
   route           Route     @relation(fields: [route_id], references: [id])
@@ -62,7 +64,7 @@ model Trip {
 
 model Payment {
   id              Int           @id @default(autoincrement())
-  status          PaymentStatus @default(menunggu)
+  status          String
   transaction_id  String
   price           Float
   expiration      DateTime
@@ -82,16 +84,8 @@ model Member {
 }
 
 model CheckPoint {
-  id      Int     @id @default(autoincrement())
-  name    String
-  picture String
-}
-
-enum PaymentStatus {
-  menunggu
-  lunas
-  aktif
-  selesai
-  ditolak
-  batal
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  picture     String
 }
