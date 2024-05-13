@@ -10,6 +10,7 @@ import { publicApi } from "./route/public-api.js";
 import { tripRouter } from "./route/trip-router.js";
 import { memberRouter } from "./route/member-router.js";
 import { checkpointRouter } from "./route/checkpoint-router.js";
+import { routeRouter } from "./route/route-router.js";
 
 // Import Prisma
 const app = express();
@@ -31,10 +32,11 @@ app.use("/api/users", userRouter);
 app.use("/api/trips", tripRouter);
 app.use("/api/members", memberRouter);
 app.use("/api/checkpoints", checkpointRouter);
+app.use("/api/routes", routeRouter);
 
 // MIDLEWARE ERROR
 app.use(errorMiddleware);
 
 app.listen(3000, () => {
-  console.log("Server is running on http://localhost:3000");
+    console.log("Server is running on http://localhost:3000");
 });

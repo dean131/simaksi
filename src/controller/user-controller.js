@@ -16,7 +16,7 @@ const register = async (req, res, next) => {
             date_of_birth: Joi.date().required(),
             weight: Joi.number().required(),
             height: Joi.number().required(),
-            address: Joi.string().max(255).required()
+            address: Joi.string().max(255).required(),
         });
         // Validasi data yang diterima dari client
         const result = registerUserValidation.validate(req.body);
@@ -25,15 +25,18 @@ const register = async (req, res, next) => {
         }
         // Validasi password dan password_confirm
         if (req.body.password !== req.body.password_confirm) {
-            throw new ResponseError(400, "Password and password_confirm not match");
+            throw new ResponseError(
+                400,
+                "Password and password_confirm not match"
+            );
         }
         // Menghapus password_confirm dari req.body
         delete result.value.password_confirm;
         // Mengecek apakah email sudah terdaftar
         const countUser = await prisma.user.count({
             where: {
-                email: result.value.email
-            }
+                email: result.value.email,
+            },
         });
         // Jika email sudah terdaftar, maka kirimkan error
         if (countUser === 1) {
@@ -42,25 +45,25 @@ const register = async (req, res, next) => {
         // Mengenkripsi password
         result.value.password = await bcrypt.hash(result.value.password, 10);
         // Menyimpan data user ke database
-        const user = await  prisma.user.create({
-            data: result.value
+        const user = await prisma.user.create({
+            data: result.value,
         });
         // Menghapus password dari user
         delete user.password;
         // Mengirimkan data user ke client
-        res.json({data: user});
+        res.json({ data: user });
     } catch (error) {
         // Mengirimkan error ke middleware error handler
         next(error);
     }
-}
+};
 
 const login = async (req, res, next) => {
     try {
         // Validasi data yang diterima dari client
         const loginUserValidation = Joi.object({
             email: Joi.string().email().max(100).required(),
-            password: Joi.string().max(100).required()
+            password: Joi.string().max(100).required(),
         });
         // Validasi data yang diterima dari client
         const result = loginUserValidation.validate(req.body);
@@ -71,38 +74,40 @@ const login = async (req, res, next) => {
         // Mengecek apakah email dan password sesuai
         const user = await prisma.user.findUnique({
             where: {
-                email: result.value.email
-            }
+                email: result.value.email,
+            },
         });
         // Jika email tidak ditemukan, kirimkan error
         if (!user) {
             throw new ResponseError(401, "email or password wrong");
         }
         // Mengecek apakah password sesuai
-        const isPasswordValid = await bcrypt.compare(result.value.password, user.password);
+        const isPasswordValid = await bcrypt.compare(
+            result.value.password,
+            user.password
+        );
         if (!isPasswordValid) {
             throw new ResponseError(401, "email or password wrong");
         }
         // Menghapus password dari user
         delete user.password;
         // Mengirimkan data user ke client
-        res.json({data: user});    
-
+        res.json({ data: user });
     } catch (error) {
         // Mengirimkan error ke middleware error handler
         next(error);
     }
-}
+};
 
 const logout = async (req, res, next) => {
     try {
         // Mengirimkan pesan ke client
-        res.json({message: "Logout success"});
+        res.json({ message: "Logout success" });
     } catch (error) {
         // Mengirimkan error ke middleware error handler
         next(error);
     }
-}
+};
 
 const get = async (req, res, next) => {
     try {
@@ -111,8 +116,8 @@ const get = async (req, res, next) => {
         // Mencari user berdasarkan id
         const user = await prisma.user.findFirst({
             where: {
-                id: parseInt(id)
-            }
+                id: parseInt(id),
+            },
         });
         // Jika user tidak ditemukan, kirimkan error
         if (!user) {
@@ -121,12 +126,12 @@ const get = async (req, res, next) => {
         // Menghapus password dari user
         delete user.password;
         // Mengirimkan data user ke client
-        res.json({data: user});
-    } catch(error) {
+        res.json({ data: user });
+    } catch (error) {
         // Mengirimkan error ke middleware error handler
         next(error);
     }
-}
+};
 
 const update = async (req, res, next) => {
     try {
@@ -139,7 +144,7 @@ const update = async (req, res, next) => {
             date_of_birth: Joi.date().required(),
             weight: Joi.number().required(),
             height: Joi.number().required(),
-            address: Joi.string().max(255).required()
+            address: Joi.string().max(255).required(),
         });
         // Validasi data yang diterima dari client
         const result = updateUserValidation.validate(req.body);
@@ -152,19 +157,19 @@ const update = async (req, res, next) => {
         // Update data user
         const user = await prisma.user.update({
             where: {
-                id: id
+                id: id,
             },
-            data: result.value
+            data: result.value,
         });
         // Menghapus password dari user
         delete user.password;
         // Mengirimkan data user ke client
-        res.json({data: user});
+        res.json({ data: user });
     } catch (error) {
         // Mengirimkan error ke middleware error handler
         next(error);
     }
-}
+};
 
 // Export controller
 export default {
@@ -172,5 +177,5 @@ export default {
     update,
     register,
     login,
-    logout
-}
+    logout,
+};

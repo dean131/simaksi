@@ -1,14 +1,14 @@
-import express from 'express';
-import tripController from '../controller/trip-controller.js';  
-import { authMiddleware } from '../middleware/auth-middleware.js';
+import express from "express";
+import tripController from "../controller/trip-controller.js";
+import { authMiddleware } from "../middleware/auth-middleware.js";
 
 export const tripRouter = new express.Router();
-tripRouter.use(authMiddleware)
+tripRouter.use(authMiddleware);
 
-tripRouter.post('/', tripController.create)
-tripRouter.get('/', tripController.list)
+tripRouter.post("/", tripController.create);
+tripRouter.get("/", tripController.list);
 
-tripRouter.get('/:id', tripController.get)
-tripRouter.post('/:id/cancel/', tripController.cancel)
+tripRouter.get("/:id", tripController.get);
+tripRouter.post("/:id/cancel/", tripController.cancel);
 
-tripRouter.post('/confirm-create', tripController.confirmCreate)
+tripRouter.post("/confirm-create/", tripController.confirmCreate);

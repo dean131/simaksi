@@ -1,4 +1,4 @@
-<h5 class="card-title fw-semibold mb-4">Recent Transactions</h5>
+<h5 class="card-title fw-semibold mb-4">Tabel Trip</h5>
 <div class="table-responsive">
     <table class="table text-nowrap mb-0 align-middle">
         <thead class="text-dark fs-4">
@@ -53,14 +53,32 @@
                         </td>
                         <td class="border-bottom-0">
                             <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-primary rounded-3 fw-semibold">
+                                <span class="badge 
+                                <% if (trip.status === 'dibatalkan') { %>
+                                    bg-danger
+                                <% } else if (trip.status === 'belum dimulai') { %>
+                                    bg-warning
+                                <% } else if (trip.status === 'berlangsung') { %>
+                                    bg-primary
+                                <% } else if (trip.status === 'selesai') { %>
+                                    bg-success 
+                                <% } %> 
+                                    rounded-3 fw-semibold">
                                     <%= trip.status %>
                                 </span>
                             </div>
                         </td>
                         <td class="border-bottom-0">
                             <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-primary rounded-3 fw-semibold">
+                                <span class="badge 
+                                    <% if (trip.payment.status === 'cancel') { %>
+                                        bg-danger
+                                    <% } else if (trip.payment.status === 'pending') { %>
+                                        bg-warning
+                                    <% } else if (trip.payment.status === 'settlement') { %>
+                                        bg-success 
+                                    <% } %> 
+                                        rounded-3 fw-semibold">
                                     <%= trip.payment.status %>
                                 </span>
                             </div>
@@ -68,9 +86,7 @@
                         <td class="border-bottom-0">
                             <% if (trip.payment.status=='pending' ) { %>
                                 <button type="button" class="btn btn-danger m-1 btn-cancel-trip">Batalkan</button>
-
                                 <% } else { %>
-
                                     <button type="button" disabled
                                         class="btn btn-danger m-1 btn-cancel-trip">Batalkan</button>
                                     <% } %>

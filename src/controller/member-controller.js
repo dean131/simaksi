@@ -6,7 +6,7 @@ const create = async (req, res, next) => {
     try {
         // validasi input
         const schema = Joi.object({
-            user_id: Joi.number().required()
+            user_id: Joi.number().required(),
         });
         const result = schema.validate(req.body);
         // jika input tidak valid
@@ -16,38 +16,37 @@ const create = async (req, res, next) => {
         const trip = await prisma.trip.findFirst({
             where: {
                 user_id: req.user.id,
-                is_created: false
-            }
+                is_created: false,
+            },
         });
         // membuat member baru
         await prisma.member.create({
             data: {
                 user_id: result.value.user_id,
-                trip_id: trip.id
-            }
+                trip_id: trip.id,
+            },
         });
         // mengambil semua member berdasarkan trip_id
         const members = await prisma.member.findMany({
             where: {
-                trip_id: trip.id
+                trip_id: trip.id,
             },
             include: {
                 user: {
                     select: {
                         id: true,
-                        name: true
-                    }
-                }
-            }
+                        name: true,
+                    },
+                },
+            },
         });
         // memberikan response
         res.json({ data: members });
-        
     } catch (error) {
         // mengirim error ke middleware error
         next(error);
     }
-}
+};
 
 const list = async (req, res, next) => {
     try {
@@ -56,16 +55,16 @@ const list = async (req, res, next) => {
         if (trip_id) {
             member = await prisma.member.findMany({
                 where: {
-                    trip_id: trip_id
+                    trip_id: trip_id,
                 },
                 include: {
                     user: {
                         select: {
                             id: true,
-                            name: true
-                        }
+                            name: true,
+                        },
                     },
-                }
+                },
             });
         } else {
             member = await prisma.member.findMany({
@@ -73,10 +72,10 @@ const list = async (req, res, next) => {
                     user: {
                         select: {
                             id: true,
-                            name: true
-                        }
+                            name: true,
+                        },
                     },
-                }
+                },
             });
         }
         // memberikan response
@@ -85,7 +84,7 @@ const list = async (req, res, next) => {
         // mengirim error ke middleware error
         next(error);
     }
-}
+};
 
 const remove = async (req, res, next) => {
     try {
@@ -93,28 +92,28 @@ const remove = async (req, res, next) => {
         const trip = await prisma.trip.findFirst({
             where: {
                 user_id: req.user.id,
-                is_created: false
-            }
+                is_created: false,
+            },
         });
         // Menghapus member berdasarkan id
         await prisma.member.delete({
             where: {
-                id: id
-            }
+                id: id,
+            },
         });
         // mengambil semua member berdasarkan trip_id
         const members = await prisma.member.findMany({
             where: {
-                trip_id: trip.id
+                trip_id: trip.id,
             },
             include: {
                 user: {
                     select: {
                         id: true,
-                        name: true
-                    }
-                }
-            }
+                        name: true,
+                    },
+                },
+            },
         });
         // memberikan response
         res.json({ data: members });
@@ -122,10 +121,10 @@ const remove = async (req, res, next) => {
         // mengirim error ke middleware error
         next(error);
     }
-}
+};
 
 export default {
     create,
     list,
-    remove
-}
+    remove,
+};
