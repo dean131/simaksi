@@ -17,13 +17,14 @@ const app = express();
 
 // MIDDLEWARE
 app.use(express.json());
+// STATIC FILES
+app.use("/public", express.static("./public"));
 
 // EJS
 app.set("view engine", "ejs");
 app.set("views", "./src/views");
+// EJS Layout
 app.use(expressLayouts);
-// STATIC FILES
-app.use("/static", express.static("./src/static"));
 
 // ROUTES
 app.use(publicApi);
@@ -37,6 +38,7 @@ app.use("/api/routes", routeRouter);
 // MIDLEWARE ERROR
 app.use(errorMiddleware);
 
+// SERVER
 app.listen(3000, () => {
-    console.log("Server is running on http://localhost:3000");
+	console.log("Server is running on http://localhost:3000");
 });
