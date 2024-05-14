@@ -26,6 +26,15 @@ const update = async (req, res, next) => {
 		if (result.error) {
 			throw new ResponseError(400, result.error.message);
 		}
+		// Cek apakah route dengan id tersebut ada di database
+		const isRouteExist = await prisma.route.findFirst({
+			where: {
+				id: id,
+			},
+		});
+		if (!isRouteExist) {
+			throw new ResponseError(404, "Route not found");
+		}
 		// Mengupdate data route di database
 		const route = await prisma.route.update({
 			where: {

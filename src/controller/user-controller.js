@@ -135,6 +135,8 @@ const get = async (req, res, next) => {
 
 const update = async (req, res, next) => {
 	try {
+		// Mengambil id user dari request params
+		const id = parseInt(req.params.id);
 		// Validasi data yang diterima dari client
 		const updateUserValidation = Joi.object({
 			email: Joi.string().email().max(100).required(),
@@ -152,8 +154,6 @@ const update = async (req, res, next) => {
 		if (result.error) {
 			throw new ResponseError(400, result.error.message);
 		}
-		// Mengambil id user dari request params
-		const id = parseInt(req.params.id);
 		// Update data user
 		const user = await prisma.user.update({
 			where: {

@@ -217,7 +217,6 @@ const paymentNotification = async (req, res, next) => {
 	try {
 		// Mengambil data dari Midtrans
 		const transaction_id = req.body.transaction_id;
-		const status = req.body.status_code;
 		const transaction_status = req.body.transaction_status;
 		// Mengambil data payment dari database
 		const payment = await prisma.payment.findFirst({

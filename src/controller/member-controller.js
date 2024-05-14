@@ -93,12 +93,17 @@ const list = async (req, res, next) => {
 const remove = async (req, res, next) => {
 	try {
 		const id = parseInt(req.params.id);
+		// mencari trip yang belum selesai
 		const trip = await prisma.trip.findFirst({
 			where: {
 				user_id: req.user.id,
 				created_at: null,
 			},
 		});
+		// jika trip tidak ditemukan
+		if (!trip) {
+			throw new ResponseError(404, "Trip not found");
+		}
 		// Menghapus member berdasarkan id
 		await prisma.member.delete({
 			where: {

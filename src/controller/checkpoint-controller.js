@@ -74,6 +74,15 @@ const update = async (req, res, next) => {
 		if (req.file) {
 			result.value.picture = req.file.path;
 		}
+		// Cek apakah checkpoint dengan id tersebut ada di database
+		const checkpointExist = await prisma.checkPoint.findUnique({
+			where: {
+				id: id,
+			},
+		});
+		if (!checkpointExist) {
+			throw new ResponseError(404, "Checkpoint not found");
+		}
 		// Mengupdate data checkpoint di database
 		const checkpoint = await prisma.checkPoint.update({
 			where: {
