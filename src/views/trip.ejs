@@ -85,10 +85,10 @@
                         </td>
                         <td class="border-bottom-0">
                             <% if (trip.payment.status=='pending' ) { %>
-                                <button type="button" class="btn btn-danger m-1 btn-cancel-trip">Batalkan</button>
+                                <button type="button" class="btn btn-danger m-1 btn-cancel">Batalkan</button>
                                 <% } else { %>
                                     <button type="button" disabled
-                                        class="btn btn-danger m-1 btn-cancel-trip">Batalkan</button>
+                                        class="btn btn-danger m-1 btn-cancel">Batalkan</button>
                                     <% } %>
                         </td>
                     </tr>
@@ -99,7 +99,7 @@
 </div>
 
 <script>
-    const cancelTripButtons = document.querySelectorAll('.btn-cancel-trip');
+    const cancelTripButtons = document.querySelectorAll('.btn-cancel');
     cancelTripButtons.forEach(button => {
         button.addEventListener('click', async (e) => {
             const tripId = e.target.parentElement.parentElement.children[0].children[0].innerText;

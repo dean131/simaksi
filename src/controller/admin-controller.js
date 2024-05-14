@@ -53,9 +53,13 @@ const trip = async (req, res) => {
 };
 
 const checkpoint = async (req, res) => {
+	// Mengambil data checkpoint dari database
+	const checkpoints = await prisma.checkPoint.findMany();
+
 	res.render("checkpoint", {
 		layout: "main-layout",
 		title: "Trip",
+		checkpoints: checkpoints,
 	});
 };
 

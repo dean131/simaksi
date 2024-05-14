@@ -30,7 +30,57 @@ const list = async (req, res, next) => {
 	}
 };
 
+const update = async (req, res, next) => {
+	try {
+		// Mengambil id checkpoint dari parameter
+		const id = parseInt(req.params.id);
+		// Membuat schema validasi
+		const schema = Joi.object({
+			name: Joi.string().required(),
+			description: Joi.string().required(),
+		});
+		const result = schema.validate(req.body);
+		if (result.error) {
+			throw new ResponseError(400, error.message);
+		}
+		// Jika file gambar diupload
+		if (req.file) {
+			result.value.picture = req.file.path;
+		}
+		// Mengupdate data checkpoint di database
+		const checkpoint = await prisma.checkPoint.update({
+			where: {
+				id: id,
+			},
+			data: result.value,
+		});
+		res.json({
+			data: checkpoint,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+const remove = async (req, res, next) => {
+	try {
+		const id = parseInt(req.params.id);
+		const checkpoint = await prisma.checkPoint.delete({
+			where: {
+				id: id,
+			},
+		});
+		res.json({
+			data: checkpoint,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
 export default {
 	get,
 	list,
+	remove,
+	update,
 };

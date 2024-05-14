@@ -1,1 +1,154 @@
-<h1>INI CHECKPOINT</h1>
+<h5 class="card-title fw-semibold mb-4">Tabel Pos</h5>
+<div class="table-responsive">
+    <table class="table text-nowrap mb-0 align-middle">
+        <thead class="text-dark fs-4">
+            <tr>
+                <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Id</h6>
+                </th>
+                <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Nama</h6>
+                </th>
+                <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Deskripsi</h6>
+                </th>
+                <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Gambar</h6>
+                </th>
+                <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Aksi</h6>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <% checkpoints.forEach(checkpoint=> { %>
+                <tr>
+                    <td class="border-bottom-0">
+                        <h6 class="fw-semibold mb-0">
+                            <%= checkpoint.id %>
+                        </h6>
+                    </td>
+                    <td class="border-bottom-0">
+                        <h6 class="fw-semibold mb-1">
+                            <%= checkpoint.name %>
+                        </h6>
+                    </td>
+                    <td class="border-bottom-0">
+                        <h6 class="fw-normal mb-1">
+                            <%= checkpoint.description %>
+                        </h6>
+                    </td>
+                    <td class="border-bottom-0">
+                        <img src="/<%= checkpoint.picture %>" alt="" width="100">
+                    </td>
+                    <td class="border-bottom-0">
+                        <button class="btn btn-warning btn-edit">Edit</button>
+                        <button class="btn btn-danger btn-delete">Hapus</button>
+                    </td>
+                </tr>
+                <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<!-- MODAL -->
+<div class="modal" tabindex="-1" id="checkpointModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Modal title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="checkpointForm" method="post" enctype="multipart/form-data">
+                    <div class="col mb-3">
+                        <label for="inputName" class="form-label">Nama POS</label>
+                        <input type="text" class="form-control" id="inputName" name="name">
+                    </div>
+                    <div class="col mb-3">
+                        <label for="cc" class="form-label">Deskripsi</label>
+                        <input type="text" class="form-control" id="inputDesc" name="desc">
+                    </div>
+                    <div class="col mb-3">
+                        <label for="inputImage" class="form-label">Gambar</label>
+                        <input type="file" class="form-control" id="inputImage" name="image">
+                    </div>
+
+                    <input type="text" name="checkpointId" id="checkpointId" hidden>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-primary" id="btnEditModal">Ubah</button>
+                <button type="button" class="btn btn-primary" id="btnAddModal">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END MODAL -->
+
+<script>
+    const btnEdit = document.querySelectorAll('.btn-edit');
+    const btnDelete = document.querySelectorAll('.btn-delete');
+
+    btnDelete.forEach(button => {
+        button.addEventListener('click', async () => {
+            const checkpointId = button.parentElement.parentElement.children[0].children[0].innerText;
+            const response = await fetch(`/api/checkpoints/${checkpointId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 5
+                }
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Gagal menghapus data checkpoint');
+            }
+        });
+    });
+
+    btnEdit.forEach(button => {
+        button.addEventListener('click', async () => {
+            const modal = new bootstrap.Modal(document.querySelector('#checkpointModal'));
+            const checkpointId = button.parentElement.parentElement.children[0].children[0].innerText;
+            const checkpointName = button.parentElement.parentElement.children[1].children[0].innerText;
+            const checkpointDes = button.parentElement.parentElement.children[2].children[0].innerText;
+            document.querySelector('#modalTitle').innerText = checkpointName;
+            document.querySelector('#checkpointId').value = checkpointId;
+            document.querySelector('#inputName').value = checkpointName;
+            document.querySelector('#inputDesc').value = checkpointDes;
+            document.querySelector('#btnAddModal').style.display = 'none';
+            modal.show();
+        });
+    });
+
+    document.querySelector('#btnEditModal').addEventListener('click', async () => {
+        const checkpointId = document.querySelector('#checkpointId').value;
+        const checkpointName = document.querySelector('#inputName').value;
+        const checkpointDes = document.querySelector('#inputDesc').value;
+        const checkpointImage = document.querySelector('#inputImage').files[0];
+        const formData = new FormData();
+        formData.append('name', checkpointName);
+        formData.append('description', checkpointDes);
+
+        if (checkpointImage) {
+            formData.append('picture', checkpointImage);
+        }
+
+        const response = await fetch('/api/checkpoints/' + checkpointId + '/update', {
+            headers: {
+                'Authorization': 5
+            },
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            alert('Gagal mengubah data checkpoint');
+        }
+    });
+</script>

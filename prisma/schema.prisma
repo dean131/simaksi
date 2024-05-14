@@ -87,5 +87,5 @@ model CheckPoint {
   id          Int     @id @default(autoincrement())
   name        String
   description String?
-  picture     String
+  picture     String?
 }

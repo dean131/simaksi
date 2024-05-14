@@ -196,7 +196,7 @@ const list = async (req, res, next) => {
 		const user_id = req.user.id;
 		// mengambil data filter dari query
 		const status = req.query.status;
-		const orderByParam = req.query.order || "created_at";
+		const orderByParam = req.query.order === "terbaru" ? "desc" : "asc";
 		// Menentukan query berdasarkan status
 		let query = {};
 		switch (status) {
@@ -259,7 +259,7 @@ const list = async (req, res, next) => {
 		const trips = await prisma.trip.findMany({
 			where: query,
 			orderBy: {
-				[orderByParam]: "desc",
+				created_at: orderByParam,
 			},
 		});
 		// Mengirimkan data trip ke client
