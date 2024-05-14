@@ -110,7 +110,7 @@ const confirmCreate = async (req, res, next) => {
 		if (!trip) {
 			throw new ResponseError(404, "Trip not found");
 		}
-		// Mengupdate trip dengan is_created = true
+		// Mengupdate trip dengan created_at
 		await prisma.trip.update({
 			where: {
 				id: trip.id,
