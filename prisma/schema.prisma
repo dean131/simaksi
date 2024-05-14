@@ -20,6 +20,7 @@ model User {
   password        String  @db.VarChar(100)
   phone           String  @db.VarChar(20)
   emergency_phone String  @db.VarChar(20)
+  gender          String?
   date_of_birth   DateTime
   weight          Float   @db.Float
   height          Float   @db.Float

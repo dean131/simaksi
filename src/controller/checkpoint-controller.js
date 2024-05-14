@@ -81,6 +81,7 @@ const update = async (req, res, next) => {
 			},
 			data: result.value,
 		});
+
 		res.json({
 			data: checkpoint,
 		});

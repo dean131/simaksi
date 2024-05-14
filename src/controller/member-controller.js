@@ -16,9 +16,13 @@ const create = async (req, res, next) => {
 		const trip = await prisma.trip.findFirst({
 			where: {
 				user_id: req.user.id,
-				is_created: false,
+				created_at: null,
 			},
 		});
+		// jika trip tidak ditemukan
+		if (!trip) {
+			throw new ResponseError(404, "Trip not found");
+		}
 		// membuat member baru
 		await prisma.member.create({
 			data: {
@@ -92,7 +96,7 @@ const remove = async (req, res, next) => {
 		const trip = await prisma.trip.findFirst({
 			where: {
 				user_id: req.user.id,
-				is_created: false,
+				created_at: null,
 			},
 		});
 		// Menghapus member berdasarkan id

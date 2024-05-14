@@ -179,11 +179,11 @@
             formData.append('picture', checkpointImage);
         }
 
-        const response = await fetch('/api/checkpoints/' + checkpointId + '/update', {
+        const response = await fetch('/api/checkpoints/' + checkpointId, {
             headers: {
                 'Authorization': 5
             },
-            method: 'POST',
+            method: 'PUT',
             body: formData
         });
 

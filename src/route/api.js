@@ -19,8 +19,8 @@ router.post(
 	upload.single("picture"),
 	checkpointController.create
 );
-router.post(
-	"/api/checkpoints/:id/update",
+router.put(
+	"/api/checkpoints/:id",
 	upload.single("picture"),
 	checkpointController.update
 );
@@ -28,21 +28,22 @@ router.delete("/api/checkpoints/:id", checkpointController.remove);
 
 // USER ROUTES
 router.get("/api/users/:id", userContoller.get);
-router.put("/api/users/:id/", userContoller.update);
-router.post("/api/users/logout/", userContoller.logout);
+router.put("/api/users/:id", userContoller.update);
+router.post("/api/users/logout", userContoller.logout);
 
 // TRIP ROUTES
 router.get("/api/trips", tripController.list);
 router.get("/api/trips/:id", tripController.get);
-router.post("/api/trips/", tripController.create);
-router.post("/api/trips/:id/cancel/", tripController.cancel);
-router.post("/api/trips/confirm-create/", tripController.confirmCreate);
+router.get("/api/trips/:id/generate_pdf", tripController.generatePDF);
+router.post("/api/trips", tripController.create);
+router.post("/api/trips/:id/cancel", tripController.cancel);
+router.post("/api/trips/confirm-create", tripController.confirmCreate);
 
 // MEMBER ROUTES
 router.get("/api/members", memberController.list);
 router.post("/api/members", memberController.create);
-router.delete("/api/members/:id/", memberController.remove);
+router.delete("/api/members/:id", memberController.remove);
 
 // ROUTE ROUTES
 router.get("/api/routes", routeController.list);
-router.put("/api/routes/:id/", routeController.update);
+router.put("/api/routes/:id", routeController.update);

@@ -3,6 +3,62 @@ import Joi from "joi";
 import { ResponseError } from "../utils/response-error.js";
 import { coreApi } from "../midtrans.js";
 
+import path from "path";
+import ejs from "ejs";
+import puppeteer from "puppeteer";
+
+const generatePDF = async (req, res, next) => {
+	try {
+		const id = parseInt(req.params.id);
+		const trip = await prisma.trip.findFirst({
+			where: {
+				id: id,
+			},
+			include: {
+				route: true,
+				user: true,
+				members: {
+					include: {
+						user: true,
+					},
+				},
+			},
+		});
+
+		if (!trip) {
+			throw new ResponseError(404, "Trip not found");
+		}
+
+		// Menghitung usia dari tanggal lahir setiap member
+		trip.members.forEach((member) => {
+			const birthDate = new Date(member.user.date_of_birth);
+			const diff = Date.now() - birthDate.getTime();
+			member.user.age = Math.abs(new Date(diff).getUTCFullYear() - 1970);
+		});
+
+		// Menghitung hari trip
+		const diff = trip.end_date - trip.start_date;
+		trip.days = diff / (1000 * 60 * 60 * 24);
+
+		// Merender template invoice.ejs
+		const html = await ejs.renderFile(
+			path.resolve("src/views/invoice.ejs"),
+			{ trip: trip },
+			{ async: true }
+		);
+		const browser = await puppeteer.launch();
+		const page = await browser.newPage();
+		await page.setContent(html);
+		const pdfBuffer = await page.pdf();
+		await browser.close(); // tutup browser
+
+		res.set("Content-Type", "application/pdf");
+		res.send(pdfBuffer);
+	} catch (error) {
+		next(error);
+	}
+};
+
 const create = async (req, res, next) => {
 	try {
 		// Validasi data yang diterima dari client
@@ -310,6 +366,7 @@ const get = async (req, res, next) => {
 };
 
 export default {
+	generatePDF,
 	create,
 	confirmCreate,
 	cancel,

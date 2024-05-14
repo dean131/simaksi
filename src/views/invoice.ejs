@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMAKSI</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-top: 50px;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        #tableTripDetail {
+            border-collapse: collapse;
+        }
+
+        #membersTable {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #noMembers {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>DETAIL BOOKING</h1>
+    <table id="tableTripDetail">
+        <tbody>
+            <tr>
+                <td>
+                    Kode Booking
+                </td>
+                <td>
+                    : <%= trip.id %>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Objek Wisata
+                </td>
+                <td>
+                    : <%= trip.route.name %>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Jumlah Hari Pendakian
+                </td>
+                <td>
+                    : <%= trip.days %>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Tanggal Booking
+                </td>
+                <td>
+                    : <%= trip.created_at %>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Status
+                </td>
+                <td>
+                    : <%= trip.status %>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h1>DETAIL PENGUNJUNG DAN ROMBONGAN</h1>
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    Nama Ketua Rombongan
+                </td>
+                <td>
+                    : <%= trip.user.name %>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Alamat
+                </td>
+                <td>
+                    : <%= trip.user.address %>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    No Telepon
+                </td>
+                <td>
+                    : <%= trip.user.phone %>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    No Telepon Darurat
+                </td>
+                <td>
+                    : <%= trip.user.emergency_phone %>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Email
+                </td>
+                <td>
+                    : <%= trip.user.email %>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Jumalah Rombongan
+                </td>
+                <td>
+                    <% const totalMembers=trip.members.length %>
+                        : <%= totalMembers %>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Data Rombongan
+                </td>
+                <td>
+                    :
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table border="1" id="membersTable">
+        <thead>
+            <th>
+                No
+            </th>
+            <th>
+                Nama
+            </th>
+            <th>
+                Usia (tahun)
+            </th>
+            <th>
+                Berat Badan (kg)
+            </th>
+            <th>
+                No Telepon
+            </th>
+            <th>
+                Alamat
+            </th>
+        </thead>
+        <tbody>
+            <% if (trip.members.length===0) { %>
+                <tr>
+                    <td colspan="6" id="noMembers">
+                        Tidak ada data rombongan
+                    </td>
+                </tr>
+                <% } %>
+                    <% trip.members.forEach(member=> { %>
+                        <tr>
+                            <td>
+                                <%= member.user.id %>
+                            </td>
+                            <td>
+                                <%= member.user.name %>
+                            </td>
+                            <td>
+                                <%= member.user.age %>
+                            </td>
+                            <td>
+                                <%= member.user.weight %>
+                            </td>
+                            <td>
+                                <%= member.user.phone %>
+                            </td>
+                            <td>
+                                <%= member.user.address %>
+                            </td>
+                        </tr>
+                        <% }) %>
+        </tbody>
+    </table>
+</body>
+
+</html>

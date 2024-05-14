@@ -15,11 +15,11 @@ publicRouter.get("/admin/trip", adminController.trip);
 publicRouter.get("/admin/checkpoint", adminController.checkpoint);
 
 // CHECKPOINT ROUTES
-publicRouter.post("/api/users/register/", userController.register);
-publicRouter.post("/api/users/login/", userController.login);
+publicRouter.post("/api/users/register", userController.register);
+publicRouter.post("/api/users/login", userController.login);
 
 // MIDTRANS NOTIFICATION
 publicRouter.post(
-	"/api/payment-notification/",
+	"/api/payment-notification",
 	tripController.paymentNotification
 );
