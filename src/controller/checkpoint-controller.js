@@ -21,6 +21,33 @@ const get = async (req, res, next) => {
 	}
 };
 
+const create = async (req, res, next) => {
+	try {
+		// Membuat schema validasi
+		const schema = Joi.object({
+			name: Joi.string().required(),
+			description: Joi.string().required(),
+		});
+		const result = schema.validate(req.body);
+		if (result.error) {
+			throw new ResponseError(400, error.message);
+		}
+		// Jika file gambar diupload
+		if (req.file) {
+			result.value.picture = req.file.path;
+		}
+		// Menambahkan data checkpoint ke database
+		const checkpoint = await prisma.checkPoint.create({
+			data: result.value,
+		});
+		res.json({
+			data: checkpoint,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
 const list = async (req, res, next) => {
 	try {
 		const checkpoint = await prisma.checkPoint.findMany();
@@ -83,4 +110,5 @@ export default {
 	list,
 	remove,
 	update,
+	create,
 };

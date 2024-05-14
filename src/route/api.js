@@ -15,6 +15,11 @@ router.use(authMiddleware);
 router.get("/api/checkpoints", checkpointController.list);
 router.get("/api/checkpoints/:id", checkpointController.get);
 router.post(
+	"/api/checkpoints",
+	upload.single("picture"),
+	checkpointController.create
+);
+router.post(
 	"/api/checkpoints/:id/update",
 	upload.single("picture"),
 	checkpointController.update

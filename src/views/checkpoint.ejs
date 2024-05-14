@@ -1,4 +1,5 @@
 <h5 class="card-title fw-semibold mb-4">Tabel Pos</h5>
+<button type="button" class="btn btn-primary" id="btnAdd">Tambah</button>
 <div class="table-responsive">
     <table class="table text-nowrap mb-0 align-middle">
         <thead class="text-dark fs-4">
@@ -39,7 +40,11 @@
                         </h6>
                     </td>
                     <td class="border-bottom-0">
-                        <img src="/<%= checkpoint.picture %>" alt="" width="100">
+                        <% if (checkpoint.picture) { %>
+                            <img src="/<%= checkpoint.picture %>" alt="" width="100">
+                            <% } else { %>
+                                <img src="https://placehold.co/100x100" alt="">
+                                <% } %>
                     </td>
                     <td class="border-bottom-0">
                         <button class="btn btn-warning btn-edit">Edit</button>
@@ -109,6 +114,42 @@
         });
     });
 
+    document.querySelector('#btnAdd').addEventListener('click', async () => {
+        document.querySelector('#checkpointForm').reset();
+        const modal = new bootstrap.Modal(document.querySelector('#checkpointModal'));
+        document.querySelector('#modalTitle').innerText = 'Tambah Checkpoint';
+        document.querySelector('#btnEditModal').style.display = 'none';
+        document.querySelector('#btnAddModal').style.display = 'block';
+        modal.show();
+    });
+
+    document.querySelector('#btnAddModal').addEventListener('click', async () => {
+        const checkpointName = document.querySelector('#inputName').value;
+        const checkpointDes = document.querySelector('#inputDesc').value;
+        const checkpointImage = document.querySelector('#inputImage').files[0];
+        const formData = new FormData();
+        formData.append('name', checkpointName);
+        formData.append('description', checkpointDes);
+
+        if (checkpointImage) {
+            formData.append('picture', checkpointImage);
+        }
+
+        const response = await fetch('/api/checkpoints', {
+            headers: {
+                'Authorization': 5
+            },
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            alert('Gagal menambahkan data checkpoint');
+        }
+    });
+
     btnEdit.forEach(button => {
         button.addEventListener('click', async () => {
             const modal = new bootstrap.Modal(document.querySelector('#checkpointModal'));
@@ -120,6 +161,7 @@
             document.querySelector('#inputName').value = checkpointName;
             document.querySelector('#inputDesc').value = checkpointDes;
             document.querySelector('#btnAddModal').style.display = 'none';
+            document.querySelector('#btnEditModal').style.display = 'block';
             modal.show();
         });
     });
