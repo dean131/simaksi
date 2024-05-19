@@ -107,7 +107,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 5
+                    'Authorization': getCookie('admin_id')
                 }
             });
             if (response.ok) {

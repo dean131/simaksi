@@ -1,7 +1,6 @@
 import { prisma } from "../prisma.js";
 
 export const apiMiddleware = async (req, res, next) => {
-	console.log(`API middleware ${req.url}`);
 	const id = parseInt(req.get("Authorization"));
 	if (!id) {
 		res.status(401)
@@ -29,7 +28,7 @@ export const apiMiddleware = async (req, res, next) => {
 };
 
 export const adminMiddleware = async (req, res, next) => {
-	if (!req.cookies["user_id"]) {
+	if (!req.cookies["admin_id"]) {
 		return res.redirect("/admin/login");
 	}
 

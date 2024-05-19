@@ -102,7 +102,7 @@
             const response = await fetch(`/api/checkpoints/${checkpointId}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': 5
+                    'Authorization': getCookie('admin_id')
                 }
             });
 
@@ -137,7 +137,7 @@
 
         const response = await fetch('/api/checkpoints', {
             headers: {
-                'Authorization': 5
+                'Authorization': getCookie('admin_id')
             },
             method: 'POST',
             body: formData
@@ -181,7 +181,7 @@
 
         const response = await fetch('/api/checkpoints/' + checkpointId, {
             headers: {
-                'Authorization': 5
+                'Authorization': getCookie('admin_id')
             },
             method: 'PUT',
             body: formData

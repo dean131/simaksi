@@ -6,6 +6,8 @@ export const adminRouter = new express.Router();
 
 adminRouter.get("/login", adminController.login);
 adminRouter.post("/login", adminController.performLogin);
+adminRouter.get("/register", adminController.register);
+adminRouter.post("/register", adminController.performRegister);
 adminRouter.get("/logout", adminController.logout);
 
 adminRouter.use(adminMiddleware);

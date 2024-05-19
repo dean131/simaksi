@@ -2,7 +2,17 @@ import { prisma } from "../prisma.js";
 import bcrypt from "bcrypt";
 
 const route = async (req, res) => {
-	const route = await prisma.route.findFirst();
+	let route = await prisma.route.findFirst();
+	// Jika route tidak ditemukan, buat satu route baru
+	if (!route) {
+		route = await prisma.route.create({
+			data: {
+				name: "Merbabu",
+				price: 1000000,
+				is_open: true,
+			},
+		});
+	}
 	res.render("route", {
 		layout: "main-layout",
 		title: "Trip",
@@ -78,28 +88,61 @@ const performLogin = async (req, res) => {
 	}
 
 	// Mengecek apakah email dan password sesuai
-	const user = await prisma.user.findUnique({
+	const admin = await prisma.admin.findUnique({
 		where: {
 			email: email,
 		},
 	});
 
+	if (!admin) {
+		return res.redirect("/admin/login");
+	}
+
 	// Mengecek apakah password sesuai
-	const isPasswordValid = await bcrypt.compare(password, user.password);
+	const isPasswordValid = await bcrypt.compare(password, admin.password);
 	if (!isPasswordValid) {
 		return res.redirect("/admin/login");
 	}
 
-	if (user) {
-		res.cookie("user_id", user.id);
+	if (admin) {
+		res.cookie("admin_id", admin.id);
 		return res.redirect("/admin/route");
 	} else {
 		return res.redirect("/admin/login");
 	}
 };
 
+const register = async (req, res) => {
+	return res.render("register", {
+		layout: "auth-layout",
+	});
+};
+
+const performRegister = async (req, res) => {
+	const { email, password, name, phone } = req.body;
+
+	if (!email || !password) {
+		return res.redirect("/admin/register");
+	}
+
+	const hashedPassword = await bcrypt.hash(password, 10);
+
+	const admin = await prisma.admin.create({
+		data: {
+			email: email,
+			password: hashedPassword,
+			name: name,
+			phone: phone,
+		},
+	});
+
+	if (admin) {
+		return res.redirect("/admin/login");
+	}
+};
+
 const logout = async (req, res) => {
-	res.clearCookie("user_id");
+	res.clearCookie("admin_id");
 	return res.redirect("/admin/login");
 };
 
@@ -110,4 +153,6 @@ export default {
 	login,
 	performLogin,
 	logout,
+	register,
+	performRegister,
 };

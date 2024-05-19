@@ -7,6 +7,7 @@ const register = async (req, res, next) => {
 	try {
 		// Validasi data yang diterima dari client
 		const registerUserValidation = Joi.object({
+			national_id: Joi.string().max(30).required(),
 			email: Joi.string().email().max(100).required(),
 			password: Joi.string().max(100).required(),
 			password_confirm: Joi.string().max(100).required(),
@@ -139,6 +140,7 @@ const update = async (req, res, next) => {
 		const id = parseInt(req.params.id);
 		// Validasi data yang diterima dari client
 		const updateUserValidation = Joi.object({
+			national_id: Joi.string().max(30).required(),
 			email: Joi.string().email().max(100).required(),
 			name: Joi.string().max(100).required(),
 			phone: Joi.string().max(20).required(),
@@ -153,6 +155,16 @@ const update = async (req, res, next) => {
 		// Jika validasi gagal, kirimkan error
 		if (result.error) {
 			throw new ResponseError(400, result.error.message);
+		}
+		// Mencari user berdasarkan id
+		const isUserExist = await prisma.user.findFirst({
+			where: {
+				id: id,
+			},
+		});
+		// Jika user tidak ditemukan, kirimkan error
+		if (!isUserExist) {
+			throw new ResponseError(404, "User not found");
 		}
 		// Update data user
 		const user = await prisma.user.update({

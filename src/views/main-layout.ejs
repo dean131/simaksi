@@ -123,6 +123,14 @@
   <script src="/public/libs/apexcharts/dist/apexcharts.min.js"></script>
   <script src="/public/libs/simplebar/dist/simplebar.js"></script>
   <script src="/public/js/dashboard.js"></script>
+  <script>
+    // Function to get a specific cookie by name
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+  </script>
 </body>
 
 </html>
