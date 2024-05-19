@@ -1,4 +1,5 @@
 import { prisma } from "../prisma.js";
+import bcrypt from "bcrypt";
 
 const route = async (req, res) => {
 	const route = await prisma.route.findFirst();
@@ -63,8 +64,50 @@ const checkpoint = async (req, res) => {
 	});
 };
 
+const login = async (req, res) => {
+	res.render("login", {
+		layout: "auth-layout",
+	});
+};
+
+const performLogin = async (req, res) => {
+	const { email, password } = req.body;
+
+	if (!email || !password) {
+		return res.redirect("/admin/login");
+	}
+
+	// Mengecek apakah email dan password sesuai
+	const user = await prisma.user.findUnique({
+		where: {
+			email: email,
+		},
+	});
+
+	// Mengecek apakah password sesuai
+	const isPasswordValid = await bcrypt.compare(password, user.password);
+	if (!isPasswordValid) {
+		return res.redirect("/admin/login");
+	}
+
+	if (user) {
+		res.cookie("user_id", user.id);
+		return res.redirect("/admin/route");
+	} else {
+		return res.redirect("/admin/login");
+	}
+};
+
+const logout = async (req, res) => {
+	res.clearCookie("user_id");
+	return res.redirect("/admin/login");
+};
+
 export default {
 	trip,
 	route,
 	checkpoint,
+	login,
+	performLogin,
+	logout,
 };
