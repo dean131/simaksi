@@ -63,22 +63,41 @@ const generatePDF = async (req, res, next) => {
 const create = async (req, res, next) => {
 	try {
 		const route = await prisma.route.findFirstOrThrow();
-		// Menghapus trip dengan user_id dan created_at = null
-		await prisma.trip.deleteMany({
+		// Jika route tidak ditemukan, kirimkan error
+		if (!route) {
+			throw new ResponseError(404, "Route not found");
+		}
+		// cari trip yang belum selesai
+		const trip = await prisma.trip.findFirst({
 			where: {
 				user_id: req.user.id,
 				created_at: null,
 			},
 		});
-		// Menyimpan data trip ke database
-		const trip = await prisma.trip.create({
+		// jika trip ditemukan, hapus trip
+		if (trip) {
+			await prisma.$transaction(async (prisma) => {
+				await prisma.member.deleteMany({
+					where: {
+						trip_id: trip.id,
+					},
+				});
+				await prisma.trip.delete({
+					where: {
+						id: trip.id,
+					},
+				});
+			});
+		}
+		// membuat trip baru
+		const newTrip = await prisma.trip.create({
 			data: {
-				route_id: route.id,
 				user_id: req.user.id,
+				route_id: route.id,
 			},
 		});
 		// Mengirimkan data trip ke client
-		res.json({ data: trip });
+		res.json({ data: newTrip });
 	} catch (error) {
 		// Mengirimkan error ke middleware error handler
 		next(error);

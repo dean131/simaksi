@@ -13,6 +13,7 @@ const create = async (req, res, next) => {
 		if (result.error) {
 			throw new ResponseError(400, result.error.message);
 		}
+		// mencari trip yang created_at nya null
 		const trip = await prisma.trip.findFirst({
 			where: {
 				user_id: req.user.id,
@@ -22,6 +23,17 @@ const create = async (req, res, next) => {
 		// jika trip tidak ditemukan
 		if (!trip) {
 			throw new ResponseError(404, "Trip not found");
+		}
+		// cek apakah user_id sudah ada di member
+		const member = await prisma.member.findFirst({
+			where: {
+				user_id: result.value.user_id,
+				trip_id: trip.id,
+			},
+		});
+		// jika user_id sudah ada di member
+		if (member) {
+			throw new ResponseError(400, "User already exists in the trip");
 		}
 		// membuat member baru
 		await prisma.member.create({
