@@ -116,7 +116,8 @@ const remove = async (req, res, next) => {
 			where: {
 				trip_id: trip.id,
 			},
-			include: {
+			select: {
+				id: true,
 				user: {
 					select: {
 						id: true,
