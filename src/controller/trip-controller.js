@@ -2,6 +2,7 @@ import { prisma } from "../prisma.js";
 import Joi from "joi";
 import { ResponseError } from "../utils/response-error.js";
 import { coreApi } from "../midtrans.js";
+import moment from "moment-timezone";
 
 import path from "path";
 import ejs from "ejs";
@@ -61,28 +62,20 @@ const generatePDF = async (req, res, next) => {
 
 const create = async (req, res, next) => {
 	try {
-		// Validasi data yang diterima dari client
-		const createTripValidation = Joi.object({
-			route_id: Joi.number().required(),
-			start_date: Joi.date().required(),
-			end_date: Joi.date().required(),
-			user_id: Joi.number().required(),
-		});
-		// Validasi data yang diterima dari client
-		const result = createTripValidation.validate(req.body);
-		if (result.error) {
-			throw new ResponseError(400, result.error.message);
-		}
+		const route = await prisma.route.findFirstOrThrow();
 		// Menghapus trip dengan user_id dan created_at = null
 		await prisma.trip.deleteMany({
 			where: {
-				user_id: result.value.user_id,
+				user_id: req.user.id,
 				created_at: null,
 			},
 		});
 		// Menyimpan data trip ke database
 		const trip = await prisma.trip.create({
-			data: result.value,
+			data: {
+				route_id: route.id,
+				user_id: req.user.id,
+			},
 		});
 		// Mengirimkan data trip ke client
 		res.json({ data: trip });
@@ -94,8 +87,16 @@ const create = async (req, res, next) => {
 
 const confirmCreate = async (req, res, next) => {
 	try {
-		// Mengambil nama bank dari parameter
-		const bank = req.body.bank;
+		// Validasi data yang diterima dari client
+		const schema = Joi.object({
+			start_date: Joi.date().required(),
+			end_date: Joi.date().required(),
+			bank: Joi.string().valid("bca", "bni", "bri").required(),
+		});
+		const result = schema.validate(req.body);
+		if (result.error) {
+			throw new ResponseError(400, result.error.message);
+		}
 		// Mengambil data trip dari database
 		const trip = await prisma.trip.findFirst({
 			where: {
@@ -116,7 +117,9 @@ const confirmCreate = async (req, res, next) => {
 				id: trip.id,
 			},
 			data: {
-				created_at: new Date(),
+				start_date: new Date(result.value.start_date),
+				end_date: new Date(result.value.end_date),
+				created_at: moment().tz("Asia/Jakarta").toDate(),
 			},
 		});
 		// Membuat payload untuk request pembayaran
@@ -127,7 +130,7 @@ const confirmCreate = async (req, res, next) => {
 				gross_amount: trip.route.price,
 			},
 			bank_transfer: {
-				bank: bank,
+				bank: result.value.bank,
 			},
 			customer_details: {
 				email: req.user.email,
@@ -138,7 +141,6 @@ const confirmCreate = async (req, res, next) => {
 		// Membuat request pembayaran ke Midtrans
 		let chargeResponse = await coreApi.charge(parameter);
 		// Check response dari Midtrans
-		console.log(chargeResponse.status_code);
 		if (chargeResponse.status_code !== "201") {
 			throw new ResponseError(500, "Failed to create payment");
 		}
@@ -149,7 +151,7 @@ const confirmCreate = async (req, res, next) => {
 				transaction_id: chargeResponse.transaction_id,
 				price: parseFloat(chargeResponse.gross_amount),
 				expiration: new Date(chargeResponse.expiry_time),
-				bank: bank,
+				bank: result.value.bank,
 				va_number: chargeResponse.va_numbers[0].va_number,
 				trip_id: trip.id,
 			},
@@ -198,7 +200,7 @@ const cancel = async (req, res, next) => {
 				id: id,
 			},
 			data: {
-				canceled_at: new Date(),
+				canceled_at: moment().tz("Asia/Jakarta").toDate(),
 				payment: {
 					update: {
 						status: response.transaction_status,

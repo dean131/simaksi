@@ -6,7 +6,7 @@ import { ResponseError } from "../utils/response-error.js";
 const register = async (req, res, next) => {
 	try {
 		// Validasi data yang diterima dari client
-		const registerUserValidation = Joi.object({
+		const schema = Joi.object({
 			national_id: Joi.string().max(30).required(),
 			email: Joi.string().email().max(100).required(),
 			password: Joi.string().max(100).required(),
@@ -20,7 +20,7 @@ const register = async (req, res, next) => {
 			address: Joi.string().max(255).required(),
 		});
 		// Validasi data yang diterima dari client
-		const result = registerUserValidation.validate(req.body);
+		const result = schema.validate(req.body);
 		if (result.error) {
 			throw new ResponseError(400, result.error.message);
 		}
@@ -62,12 +62,12 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
 	try {
 		// Validasi data yang diterima dari client
-		const loginUserValidation = Joi.object({
+		const schema = Joi.object({
 			email: Joi.string().email().max(100).required(),
 			password: Joi.string().max(100).required(),
 		});
 		// Validasi data yang diterima dari client
-		const result = loginUserValidation.validate(req.body);
+		const result = schema.validate(req.body);
 		// Jika validasi gagal, kirimkan error
 		if (result.error) {
 			throw new ResponseError(400, result.error.message);
@@ -139,7 +139,7 @@ const update = async (req, res, next) => {
 		// Mengambil id user dari request params
 		const id = parseInt(req.params.id);
 		// Validasi data yang diterima dari client
-		const updateUserValidation = Joi.object({
+		const schema = Joi.object({
 			national_id: Joi.string().max(30).required(),
 			email: Joi.string().email().max(100).required(),
 			name: Joi.string().max(100).required(),
@@ -151,7 +151,7 @@ const update = async (req, res, next) => {
 			address: Joi.string().max(255).required(),
 		});
 		// Validasi data yang diterima dari client
-		const result = updateUserValidation.validate(req.body);
+		const result = schema.validate(req.body);
 		// Jika validasi gagal, kirimkan error
 		if (result.error) {
 			throw new ResponseError(400, result.error.message);
