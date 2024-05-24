@@ -268,17 +268,15 @@ const paymentNotification = async (req, res, next) => {
 
 const list = async (req, res, next) => {
 	try {
-		// Mengambil user_id dari request
-		const user_id = req.user.id;
 		// mengambil data filter dari query
-		const status = req.query.status;
+		const status = req.query.status ? req.query.status : "all";
 		const orderByParam = req.query.order === "terbaru" ? "desc" : "asc";
 		// Menentukan query berdasarkan status
 		let query = {};
 		switch (status) {
 			case "menunggu":
 				query = {
-					user_id: user_id,
+					user_id: req.user.id,
 					checked_in_at: null,
 					checked_out_at: null,
 					canceled_at: null,
@@ -290,7 +288,7 @@ const list = async (req, res, next) => {
 				break;
 			case "lunas":
 				query = {
-					user_id: user_id,
+					user_id: req.user.id,
 					checked_in_at: null,
 					checked_out_at: null,
 					canceled_at: null,
@@ -302,7 +300,7 @@ const list = async (req, res, next) => {
 				break;
 			case "aktif":
 				query = {
-					user_id: user_id,
+					user_id: req.user.id,
 					checked_in_at: { not: null },
 					checked_out_at: null,
 					canceled_at: null,
@@ -310,7 +308,7 @@ const list = async (req, res, next) => {
 				};
 			case "selesai":
 				query = {
-					user_id: user_id,
+					user_id: req.user.id,
 					checked_in_at: { not: null },
 					checked_out_at: { not: null },
 					canceled_at: null,
@@ -319,7 +317,7 @@ const list = async (req, res, next) => {
 				break;
 			case "ditolak":
 				query = {
-					user_id: user_id,
+					user_id: req.user.id,
 					checked_in_at: null,
 					checked_out_at: null,
 					canceled_at: { not: null },
@@ -328,7 +326,7 @@ const list = async (req, res, next) => {
 				break;
 			default:
 				query = {
-					user_id: user_id,
+					user_id: req.user.id,
 				};
 		}
 		// Mengambil data trip dari database
@@ -337,9 +335,28 @@ const list = async (req, res, next) => {
 			orderBy: {
 				created_at: orderByParam,
 			},
+			include: {
+				payment: true,
+			},
+		});
+		// tambah status ke data trip
+		const tripsWithStatus = trips.map((trip) => {
+			if (trip.payment && trip.payment.status === "settlement") {
+				return { ...trip, status: "lunas" };
+			} else if (trip.payment && trip.payment.status === "pending") {
+				return { ...trip, status: "menunggu" };
+			} else if (trip.canceled_at) {
+				return { ...trip, status: "dibatalkan" };
+			} else if (trip.checked_out_at) {
+				return { ...trip, status: "selesai" };
+			} else if (trip.checked_in_at) {
+				return { ...trip, status: "berlangsung" };
+			} else {
+				return { ...trip, status: "belum dimulai" };
+			}
 		});
 		// Mengirimkan data trip ke client
-		res.json({ data: trips });
+		res.json({ data: tripsWithStatus });
 	} catch (error) {
 		// Mengirimkan error ke middleware error handler
 		next(error);
