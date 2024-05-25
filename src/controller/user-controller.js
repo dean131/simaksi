@@ -15,6 +15,7 @@ const register = async (req, res, next) => {
 			phone: Joi.string().max(20).required(),
 			emergency_phone: Joi.string().max(20).required(),
 			date_of_birth: Joi.date().required(),
+			gender: Joi.string().required(),
 			weight: Joi.number().required(),
 			height: Joi.number().required(),
 			address: Joi.string().max(255).required(),
