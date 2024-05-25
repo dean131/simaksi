@@ -350,9 +350,7 @@ const list = async (req, res, next) => {
 			} else if (trip.checked_out_at) {
 				return { ...trip, status: "selesai" };
 			} else if (trip.checked_in_at) {
-				return { ...trip, status: "berlangsung" };
-			} else {
-				return { ...trip, status: "belum dimulai" };
+				return { ...trip, status: "aktif" };
 			}
 		});
 		// Mengirimkan data trip ke client
