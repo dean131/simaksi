@@ -45,14 +45,16 @@ const trip = async (req, res) => {
 			year: "numeric",
 		});
 		// Tambahkan atribut "status" berdasarkan kondisi
-		if (trip.canceled_at) {
+		if (trip.payment && trip.payment.status === "settlement") {
+			return { ...trip, status: "lunas" };
+		} else if (trip.payment && trip.payment.status === "pending") {
+			return { ...trip, status: "menunggu" };
+		} else if (trip.canceled_at) {
 			return { ...trip, status: "dibatalkan" };
 		} else if (trip.checked_out_at) {
 			return { ...trip, status: "selesai" };
 		} else if (trip.checked_in_at) {
-			return { ...trip, status: "berlangsung" };
-		} else {
-			return { ...trip, status: "belum dimulai" };
+			return { ...trip, status: "aktif" };
 		}
 	});
 
