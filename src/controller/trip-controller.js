@@ -236,17 +236,22 @@ const cancel = async (req, res, next) => {
 
 const paymentNotification = async (req, res, next) => {
 	try {
+		console.log(`req.body: ${req.body}`);
 		// Mengambil data dari Midtrans
 		const transaction_id = req.body.transaction_id;
 		const transaction_status = req.body.transaction_status;
+		console.log(`transaction_id: ${transaction_id}`);
+		console.log(`transaction_status: ${transaction_status}`);
 		// Mengambil data payment dari database
 		const payment = await prisma.payment.findFirst({
 			where: {
 				transaction_id: transaction_id,
 			},
 		});
+		console.log(`payment: ${payment}`);
 		// Jika payment tidak ditemukan, kirimkan error
 		if (!payment) {
+			console.log("Payment not found");
 			throw new ResponseError(404, "Payment not found");
 		}
 		// Mengupdate status payment
@@ -258,8 +263,8 @@ const paymentNotification = async (req, res, next) => {
 				status: transaction_status,
 			},
 		});
-		// Mengirimkan pesan ke client
-		res.json({ message: "Payment notification received" });
+		// Mengirimkan pesan ke midtrans
+		res.status(200).json({ status: "OK" });
 	} catch (error) {
 		// Mengirimkan error ke middleware error handler
 		next(error);
@@ -341,16 +346,22 @@ const list = async (req, res, next) => {
 		});
 		// tambah status ke data trip
 		const tripsWithStatus = trips.map((trip) => {
-			if (trip.payment && trip.payment.status === "settlement") {
-				return { ...trip, status: "lunas" };
-			} else if (trip.payment && trip.payment.status === "pending") {
-				return { ...trip, status: "menunggu" };
-			} else if (trip.canceled_at) {
+			if (trip.canceled_at) {
 				return { ...trip, status: "dibatalkan" };
 			} else if (trip.checked_out_at) {
 				return { ...trip, status: "selesai" };
 			} else if (trip.checked_in_at) {
 				return { ...trip, status: "aktif" };
+			} else if (
+				trip.created_at != null &&
+				trip.payment.status === "settlement"
+			) {
+				return { ...trip, status: "lunas" };
+			} else if (
+				trip.payment != null &&
+				trip.payment.status === "pending"
+			) {
+				return { ...trip, status: "menunggu" };
 			}
 		});
 		// Mengirimkan data trip ke client

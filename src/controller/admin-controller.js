@@ -34,27 +34,32 @@ const trip = async (req, res) => {
 
 	const tripsWithStatus = trips.map((trip) => {
 		// ubah fromat waktu
-		trip.start_date = trip.start_date.toLocaleDateString("id-ID", {
-			day: "numeric",
-			month: "long",
-			year: "numeric",
-		});
-		trip.end_date = trip.end_date.toLocaleDateString("id-ID", {
-			day: "numeric",
-			month: "long",
-			year: "numeric",
-		});
+		if (trip.created_at) {
+			trip.start_date = trip.start_date.toLocaleDateString("id-ID", {
+				day: "numeric",
+				month: "long",
+				year: "numeric",
+			});
+			trip.end_date = trip.end_date.toLocaleDateString("id-ID", {
+				day: "numeric",
+				month: "long",
+				year: "numeric",
+			});
+		}
 		// Tambahkan atribut "status" berdasarkan kondisi
-		if (trip.payment && trip.payment.status === "settlement") {
-			return { ...trip, status: "lunas" };
-		} else if (trip.payment && trip.payment.status === "pending") {
-			return { ...trip, status: "menunggu" };
-		} else if (trip.canceled_at) {
+		if (trip.canceled_at) {
 			return { ...trip, status: "dibatalkan" };
 		} else if (trip.checked_out_at) {
 			return { ...trip, status: "selesai" };
 		} else if (trip.checked_in_at) {
 			return { ...trip, status: "aktif" };
+		} else if (
+			trip.created_at != null &&
+			trip.payment.status === "settlement"
+		) {
+			return { ...trip, status: "lunas" };
+		} else if (trip.payment != null && trip.payment.status === "pending") {
+			return { ...trip, status: "menunggu" };
 		}
 	});
 

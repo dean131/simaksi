@@ -1,7 +1,5 @@
 import express from "express";
-import userController from "../controller/user-controller.js";
 import tripController from "../controller/trip-controller.js";
-import adminController from "../controller/admin-controller.js";
 
 export const publicRouter = new express.Router();
 
