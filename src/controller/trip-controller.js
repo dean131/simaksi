@@ -359,6 +359,8 @@ const list = async (req, res, next) => {
 				} else if (trip.payment.status === "pending") {
 					return { ...trip, status: "menunggu" };
 				}
+			} else {
+				return { ...trip, status: "none" };
 			}
 		});
 		// mengecualikan status "none"
