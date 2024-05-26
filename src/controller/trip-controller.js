@@ -346,16 +346,21 @@ const list = async (req, res, next) => {
 		});
 		// tambah status ke data trip
 		const tripsWithStatus = trips.map((trip) => {
-			if (trip.canceled_at) {
-				return { ...trip, status: "dibatalkan" };
-			} else if (trip.checked_out_at) {
-				return { ...trip, status: "selesai" };
-			} else if (trip.checked_in_at) {
-				return { ...trip, status: "aktif" };
-			} else if (trip.payment && trip.payment.status === "settlement") {
-				return { ...trip, status: "lunas" };
-			} else if (trip.payment && trip.payment.status === "pending") {
-				return { ...trip, status: "menunggu" };
+			if (irip && trip.created_at) {
+				if (trip.canceled_at) {
+					return { ...trip, status: "dibatalkan" };
+				} else if (trip.checked_out_at) {
+					return { ...trip, status: "selesai" };
+				} else if (trip.checked_in_at) {
+					return { ...trip, status: "aktif" };
+				} else if (
+					trip.payment &&
+					trip.payment.status === "settlement"
+				) {
+					return { ...trip, status: "lunas" };
+				} else if (trip.payment && trip.payment.status === "pending") {
+					return { ...trip, status: "menunggu" };
+				}
 			}
 		});
 		// Mengirimkan data trip ke client
