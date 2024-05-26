@@ -8,6 +8,12 @@ import path from "path";
 import ejs from "ejs";
 import puppeteer from "puppeteer";
 
+function getRandomInt(min, max) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 const generatePDF = async (req, res, next) => {
 	try {
 		const id = parseInt(req.params.id);
@@ -97,6 +103,7 @@ const create = async (req, res, next) => {
 		// membuat trip baru
 		const newTrip = await prisma.trip.create({
 			data: {
+				id: getRandomInt(100000, 999999),
 				user_id: req.user.id,
 				route_id: route.id,
 			},

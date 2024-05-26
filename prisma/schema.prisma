@@ -48,7 +48,7 @@ model Route {
 }
 
 model Trip {
-  id              Int       @id @default(autoincrement())
+  id              Int       @id
   start_date      DateTime?
   end_date        DateTime?
   checked_in_at   DateTime?
