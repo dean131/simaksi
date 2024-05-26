@@ -106,7 +106,7 @@
                                     </button>
                                     <% } %>
 
-                                        <% if (trip.checked_in_at) { %>
+                                        <% if (trip.status=="aktif" ) { %>
                                             <button type="button" class="btn btn-info m-1 btn-check-out">
                                                 Checkout
                                             </button>
@@ -116,7 +116,7 @@
                                                 </button>
                                                 <% } %>
 
-                                                    <% if (trip.payment.status=='pending' ) { %>
+                                                    <% if (trip.status=='menunggu' ) { %>
                                                         <button type="button" class="btn btn-danger m-1 btn-cancel">
                                                             Batalkan
                                                         </button>
