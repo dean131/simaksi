@@ -346,7 +346,7 @@ const list = async (req, res, next) => {
 		});
 		// tambah status ke data trip
 		const tripsWithStatus = trips.map((trip) => {
-			if (trip.payment !== null) {
+			if (trip.payment) {
 				if (trip.payment.status === "settlement") {
 					return { ...trip, status: "lunas" };
 				} else if (trip.payment.status === "pending") {
