@@ -73,6 +73,10 @@ const create = async (req, res, next) => {
 		if (!route) {
 			throw new ResponseError(404, "Route not found");
 		}
+		// if route is closed, send error
+		if (!route.is_open) {
+			throw new ResponseError(400, "Route is closed");
+		}
 		// cari trip yang belum selesai
 		const trip = await prisma.trip.findFirst({
 			where: {
