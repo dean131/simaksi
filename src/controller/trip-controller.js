@@ -346,23 +346,18 @@ const list = async (req, res, next) => {
 		});
 		// tambah status ke data trip
 		const tripsWithStatus = trips.map((trip) => {
-			if (trip && trip.created_at) {
-				if (trip.canceled_at) {
-					return { ...trip, status: "dibatalkan" };
-				} else if (trip.checked_out_at) {
-					return { ...trip, status: "selesai" };
-				} else if (trip.checked_in_at) {
-					return { ...trip, status: "aktif" };
-				} else if (
-					trip.payment &&
-					trip.payment.status === "settlement"
-				) {
+			if (trip.payment !== null) {
+				if (trip.payment.status === "settlement") {
 					return { ...trip, status: "lunas" };
-				} else if (trip.payment && trip.payment.status === "pending") {
+				} else if (trip.payment.status === "pending") {
 					return { ...trip, status: "menunggu" };
-				} else {
-					return { ...trip, status: "none" };
 				}
+			} else if (trip.canceled_at) {
+				return { ...trip, status: "dibatalkan" };
+			} else if (trip.checked_out_at) {
+				return { ...trip, status: "selesai" };
+			} else if (trip.checked_in_at) {
+				return { ...trip, status: "aktif" };
 			}
 		});
 		// mengecualikan status "none"
