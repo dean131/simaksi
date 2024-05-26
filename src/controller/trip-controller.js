@@ -275,6 +275,7 @@ const list = async (req, res, next) => {
 	try {
 		// mengambil data filter dari query
 		const status = req.query.status ? req.query.status : "all";
+		console.log(status);
 		const orderByParam = req.query.order === "terbaru" ? "desc" : "asc";
 		// Menentukan query berdasarkan status
 		let query = {};
@@ -346,19 +347,19 @@ const list = async (req, res, next) => {
 		});
 		// tambah status ke data trip
 		const tripsWithStatus = trips.map((trip) => {
-			if (trip.payment) {
-				if (trip.payment.status === "settlement") {
-					return { ...trip, status: "lunas" };
-				} else if (trip.payment.status === "pending") {
-					return { ...trip, status: "menunggu" };
-				}
-			} else if (trip.canceled_at) {
+			
+			if (trip.canceled_at) {
 				return { ...trip, status: "dibatalkan" };
 			} else if (trip.checked_out_at) {
 				return { ...trip, status: "selesai" };
 			} else if (trip.checked_in_at) {
 				return { ...trip, status: "aktif" };
-			}
+			} else if (trip.payment) {
+				if (trip.payment.status === "settlement") {
+					return { ...trip, status: "lunas" };
+				} else if (trip.payment.status === "pending") {
+					return { ...trip, status: "menunggu" };
+				}
 		});
 		// mengecualikan status "none"
 		const tripsWithStatusFiltered = tripsWithStatus.filter(
