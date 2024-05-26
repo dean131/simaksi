@@ -82,6 +82,11 @@ const create = async (req, res, next) => {
 						trip_id: trip.id,
 					},
 				});
+				await prisma.payment.deleteMany({
+					where: {
+						trip_id: trip.id,
+					},
+				});
 				await prisma.trip.delete({
 					where: {
 						id: trip.id,
@@ -138,10 +143,12 @@ const confirmCreate = async (req, res, next) => {
 			},
 		});
 		if (existingPayment) {
-			throw new ResponseError(
-				409,
-				"Payment already exists for this trip"
-			);
+			// delete existing payment
+			await prisma.payment.delete({
+				where: {
+					id: existingPayment.id,
+				},
+			});
 		}
 		// Mengupdate trip dengan created_at
 		trip = await prisma.trip.update({
