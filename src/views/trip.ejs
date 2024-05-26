@@ -96,36 +96,15 @@
                                 <% }) %>
                         </td>
                         <td class="border-bottom-0">
-                            <% if (trip.status=="lunas" || !(trip.status=="dibatalkan" )) { %>
-                                <button type="button" class="btn btn-info m-1 btn-check-in">
-                                    Checkin
-                                </button>
-                                <% } else { %>
-                                    <button type="button" disabled class="btn btn-info m-1 btn-check-in">
-                                        Checkin
-                                    </button>
-                                    <% } %>
-
-                                        <% if (trip.checked_in_at || !(trip.status=="dibatalkan" )) { %>
-                                            <button type="button" class="btn btn-info m-1 btn-check-out">
-                                                Checkout
-                                            </button>
-                                            <% } else { %>
-                                                <button type="button" disabled class="btn btn-info m-1 btn-check-out">
-                                                    Checkout
-                                                </button>
-                                                <% } %>
-
-                                                    <% if (trip.payment.status=='pending' ) { %>
-                                                        <button type="button" class="btn btn-danger m-1 btn-cancel">
-                                                            Batalkan
-                                                        </button>
-                                                        <% } else { %>
-                                                            <button type="button" disabled
-                                                                class="btn btn-danger m-1 btn-cancel">
-                                                                Batalkan
-                                                            </button>
-                                                            <% } %>
+                            <button type="button" class="btn btn-info m-1 btn-check-in">
+                                Checkin
+                            </button>
+                            <button type="button" class="btn btn-info m-1 btn-check-out">
+                                Checkout
+                            </button>
+                            <button type="button" class="btn btn-danger m-1 btn-cancel">
+                                Batalkan
+                            </button>
                         </td>
                     </tr>
                     <% } %>
@@ -135,6 +114,37 @@
 </div>
 
 <script>
+    document.querySelectorAll('tr').forEach(row => {
+        const status = row.querySelector('td:nth-child(4) .badge').innerText.trim().toLowerCase();
+        const checkInButton = row.querySelector('.btn-check-in');
+        const checkOutButton = row.querySelector('.btn-check-out');
+        const cancelButton = row.querySelector('.btn-cancel');
+
+        switch (status) {
+            case 'aktif':
+                checkInButton.disabled = true;
+                cancelButton.disabled = true;
+                checkOutButton.disabled = false;
+                break;
+            case 'lunas':
+                checkInButton.disabled = false;
+                cancelButton.disabled = true;
+                checkOutButton.disabled = true;
+                break;
+            case 'menunggu':
+                checkInButton.disabled = true;
+                cancelButton.disabled = false;
+                checkOutButton.disabled = true;
+                break;
+            case 'dibatalkan':
+            case 'selesai':
+                checkInButton.disabled = true;
+                cancelButton.disabled = true;
+                checkOutButton.disabled = true;
+                break;
+        }
+    });
+
     const cancelTripButtons = document.querySelectorAll('.btn-cancel');
     cancelTripButtons.forEach(button => {
         button.addEventListener('click', async (e) => {
