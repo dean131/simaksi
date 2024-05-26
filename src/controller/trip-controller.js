@@ -346,7 +346,7 @@ const list = async (req, res, next) => {
 		});
 		// tambah status ke data trip
 		const tripsWithStatus = trips.map((trip) => {
-			if (irip && trip.created_at) {
+			if (trip && trip.created_at) {
 				if (trip.canceled_at) {
 					return { ...trip, status: "dibatalkan" };
 				} else if (trip.checked_out_at) {
