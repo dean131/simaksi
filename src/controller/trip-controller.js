@@ -140,13 +140,16 @@ const confirmCreate = async (req, res, next) => {
 				end_date: new Date(result.value.end_date),
 				created_at: moment().tz("Asia/Jakarta").toDate(),
 			},
+			select: {
+				members: true,
+			},
 		});
 		// Membuat payload untuk request pembayaran
 		let parameter = {
 			payment_type: "bank_transfer",
 			transaction_details: {
 				order_id: trip.id.toString(),
-				gross_amount: trip.route.price,
+				gross_amount: trip.route.price * trip.members.length,
 			},
 			bank_transfer: {
 				bank: result.value.bank,
