@@ -96,7 +96,7 @@
                                 <% }) %>
                         </td>
                         <td class="border-bottom-0">
-                            <% if (trip.status=="lunas" ) { %>
+                            <% if (trip.status=="lunas" || !(trip.status=="dibatalkan" )) { %>
                                 <button type="button" class="btn btn-info m-1 btn-check-in">
                                     Checkin
                                 </button>
@@ -106,7 +106,7 @@
                                     </button>
                                     <% } %>
 
-                                        <% if (trip.checked_in_at) { %>
+                                        <% if (trip.checked_in_at || !(trip.status=="dibatalkan" )) { %>
                                             <button type="button" class="btn btn-info m-1 btn-check-out">
                                                 Checkout
                                             </button>
