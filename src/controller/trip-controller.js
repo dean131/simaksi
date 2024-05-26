@@ -149,7 +149,7 @@ const confirmCreate = async (req, res, next) => {
 			payment_type: "bank_transfer",
 			transaction_details: {
 				order_id: trip.id.toString(),
-				gross_amount: trip.route.price * trip.members.length,
+				gross_amount: trip.route.price * (trip.members.length + 1),
 			},
 			bank_transfer: {
 				bank: result.value.bank,
