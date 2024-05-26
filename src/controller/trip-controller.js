@@ -347,7 +347,6 @@ const list = async (req, res, next) => {
 		});
 		// tambah status ke data trip
 		const tripsWithStatus = trips.map((trip) => {
-			
 			if (trip.canceled_at) {
 				return { ...trip, status: "dibatalkan" };
 			} else if (trip.checked_out_at) {
@@ -360,6 +359,7 @@ const list = async (req, res, next) => {
 				} else if (trip.payment.status === "pending") {
 					return { ...trip, status: "menunggu" };
 				}
+			}
 		});
 		// mengecualikan status "none"
 		const tripsWithStatusFiltered = tripsWithStatus.filter(
