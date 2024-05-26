@@ -117,13 +117,14 @@ const confirmCreate = async (req, res, next) => {
 			throw new ResponseError(400, result.error.message);
 		}
 		// Mengambil data trip dari database
-		const trip = await prisma.trip.findFirst({
+		let trip = await prisma.trip.findFirst({
 			where: {
 				user_id: req.user.id,
 				created_at: null,
 			},
 			include: {
 				route: true,
+				members: true,
 			},
 		});
 		// Jika trip tidak ditemukan, kirimkan error
@@ -131,7 +132,7 @@ const confirmCreate = async (req, res, next) => {
 			throw new ResponseError(404, "Trip not found");
 		}
 		// Mengupdate trip dengan created_at
-		await prisma.trip.update({
+		trip = await prisma.trip.update({
 			where: {
 				id: trip.id,
 			},
@@ -141,6 +142,7 @@ const confirmCreate = async (req, res, next) => {
 				created_at: moment().tz("Asia/Jakarta").toDate(),
 			},
 			select: {
+				route: true,
 				members: true,
 			},
 		});
