@@ -96,22 +96,22 @@
                                 <% }) %>
                         </td>
                         <td class="border-bottom-0">
-                            <% if (trip.checked_in_at) { %>
-                                <button type="button" disabled class="btn btn-info m-1 btn-check-in">
+                            <% if (trip.status=="lunas" ) { %>
+                                <button type="button" class="btn btn-info m-1 btn-check-in">
                                     Checkin
                                 </button>
                                 <% } else { %>
-                                    <button type="button" class="btn btn-info m-1 btn-check-in">
+                                    <button type="button" disabled class="btn btn-info m-1 btn-check-in">
                                         Checkin
                                     </button>
                                     <% } %>
 
-                                        <% if (trip.checked_out_at) { %>
-                                            <button type="button" disabled class="btn btn-info m-1 btn-check-out">
+                                        <% if (trip.checked_in_at) { %>
+                                            <button type="button" class="btn btn-info m-1 btn-check-out">
                                                 Checkout
                                             </button>
                                             <% } else { %>
-                                                <button type="button" class="btn btn-info m-1 btn-check-out">
+                                                <button type="button" disabled class="btn btn-info m-1 btn-check-out">
                                                     Checkout
                                                 </button>
                                                 <% } %>
