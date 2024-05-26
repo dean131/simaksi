@@ -58,15 +58,14 @@ const trip = async (req, res) => {
 			return { ...trip, status: "selesai" };
 		} else if (trip.checked_in_at) {
 			return { ...trip, status: "aktif" };
-		} else if (
-			trip.created_at != null &&
-			trip.payment.status === "settlement"
-		) {
+		} else if (trip.payment && trip.payment.status === "settlement") {
 			return { ...trip, status: "lunas" };
-		} else if (trip.payment != null && trip.payment.status === "pending") {
+		} else if (trip.payment && trip.payment.status === "pending") {
 			return { ...trip, status: "menunggu" };
 		}
 	});
+
+	console.log(tripsWithStatus);
 
 	res.render("trip", {
 		layout: "main-layout",

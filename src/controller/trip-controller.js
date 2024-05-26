@@ -141,7 +141,7 @@ const confirmCreate = async (req, res, next) => {
 				end_date: new Date(result.value.end_date),
 				created_at: moment().tz("Asia/Jakarta").toDate(),
 			},
-			select: {
+			include: {
 				route: true,
 				members: true,
 			},
