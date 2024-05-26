@@ -312,6 +312,7 @@ const list = async (req, res, next) => {
 					canceled_at: null,
 					created_at: { not: null },
 				};
+				break;
 			case "selesai":
 				query = {
 					user_id: req.user.id,
@@ -358,6 +359,8 @@ const list = async (req, res, next) => {
 					return { ...trip, status: "lunas" };
 				} else if (trip.payment.status === "pending") {
 					return { ...trip, status: "menunggu" };
+				} else {
+					return { ...trip, status: "none" };
 				}
 			} else {
 				return { ...trip, status: "none" };
