@@ -360,11 +360,17 @@ const list = async (req, res, next) => {
 					return { ...trip, status: "lunas" };
 				} else if (trip.payment && trip.payment.status === "pending") {
 					return { ...trip, status: "menunggu" };
+				} else {
+					return { ...trip, status: "none" };
 				}
 			}
 		});
+		// mengecualikan status "none"
+		const tripsWithStatusFiltered = tripsWithStatus.filter(
+			(trip) => trip.status !== "none"
+		);
 		// Mengirimkan data trip ke client
-		res.json({ data: tripsWithStatus });
+		res.json({ data: tripsWithStatusFiltered });
 	} catch (error) {
 		// Mengirimkan error ke middleware error handler
 		next(error);
