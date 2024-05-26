@@ -131,6 +131,18 @@ const confirmCreate = async (req, res, next) => {
 		if (!trip) {
 			throw new ResponseError(404, "Trip not found");
 		}
+		// Check if there's already a payment for this trip
+		const existingPayment = await prisma.payment.findFirst({
+			where: {
+				trip_id: trip.id,
+			},
+		});
+		if (existingPayment) {
+			throw new ResponseError(
+				409,
+				"Payment already exists for this trip"
+			);
+		}
 		// Mengupdate trip dengan created_at
 		trip = await prisma.trip.update({
 			where: {
