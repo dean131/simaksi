@@ -409,11 +409,84 @@ const get = async (req, res, next) => {
 	}
 };
 
+const checkIn = async (req, res, next) => {
+	try {
+		console.log(req.body);
+		// Mengambil id trip dari parameter
+		const id = parseInt(req.params.id);
+		// Mengambil data trip dari database
+		const trip = await prisma.trip.findFirst({
+			where: {
+				id: id,
+				// user_id: req.user.id,
+				// created_at: { not: null },
+				// checked_in_at: null,
+				// checked_out_at: null,
+				// canceled_at: null,
+			},
+		});
+		// Jika trip tidak ditemukan, kirimkan error
+		if (!trip) {
+			throw new ResponseError(404, "Trip not found");
+		}
+		// Mengupdate trip dengan checked_in_at
+		await prisma.trip.update({
+			where: {
+				id: id,
+			},
+			data: {
+				checked_in_at: moment().tz("Asia/Jakarta").toDate(),
+			},
+		});
+		// Mengirimkan pesan ke client
+		res.json({ message: "Check in success" });
+	} catch (error) {
+		next(error);
+	}
+};
+
+const checkOut = async (req, res, next) => {
+	try {
+		// Mengambil id trip dari parameter
+		const id = parseInt(req.params.id);
+		// Mengambil data trip dari database
+		const trip = await prisma.trip.findFirst({
+			where: {
+				id: id,
+				// user_id: req.user.id,
+				// created_at: { not: null },
+				// checked_in_at: { not: null },
+				// checked_out_at: null,
+				// canceled_at: null,
+			},
+		});
+		// Jika trip tidak ditemukan, kirimkan error
+		if (!trip) {
+			throw new ResponseError(404, "Trip not found");
+		}
+		// Mengupdate trip dengan checked_out_at
+		await prisma.trip.update({
+			where: {
+				id: id,
+			},
+			data: {
+				checked_out_at: moment().tz("Asia/Jakarta").toDate(),
+			},
+		});
+		// Mengirimkan pesan ke client
+		res.json({ message: "Check out success" });
+	} catch (error) {
+		next(error);
+	}
+};
+
 export default {
 	generatePDF,
 	create,
 	confirmCreate,
 	cancel,
+	checkIn,
+	checkOut,
 	paymentNotification,
 	list,
 	get,

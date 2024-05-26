@@ -26,6 +26,11 @@ const trip = async (req, res) => {
 		include: {
 			user: true,
 			payment: true,
+			members: {
+				include: {
+					user: true,
+				},
+			},
 		},
 		orderBy: {
 			canceled_at: "desc",

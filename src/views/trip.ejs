@@ -19,6 +19,9 @@
                     <h6 class="fw-semibold mb-0">Status Pembayaran</h6>
                 </th>
                 <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Anggota</h6>
+                </th>
+                <th class="border-bottom-0">
                     <h6 class="fw-semibold mb-0">Aksi</h6>
                 </th>
             </tr>
@@ -86,12 +89,43 @@
                             </div>
                         </td>
                         <td class="border-bottom-0">
-                            <% if (trip.payment.status=='pending' ) { %>
-                                <button type="button" class="btn btn-danger m-1 btn-cancel">Batalkan</button>
+                            <% trip.members.forEach(member=> { %>
+                                <h6 class="fw-semibold mb-1">
+                                    - <%= member.user.name %>
+                                </h6>
+                                <% }) %>
+                        </td>
+                        <td class="border-bottom-0">
+                            <% if (trip.checked_in_at) { %>
+                                <button type="button" disabled class="btn btn-info m-1 btn-check-in">
+                                    Checkin
+                                </button>
                                 <% } else { %>
-                                    <button type="button" disabled
-                                        class="btn btn-danger m-1 btn-cancel">Batalkan</button>
+                                    <button type="button" class="btn btn-info m-1 btn-check-in">
+                                        Checkin
+                                    </button>
                                     <% } %>
+
+                                        <% if (trip.checked_out_at) { %>
+                                            <button type="button" disabled class="btn btn-info m-1 btn-check-out">
+                                                Checkout
+                                            </button>
+                                            <% } else { %>
+                                                <button type="button" class="btn btn-info m-1 btn-check-out">
+                                                    Checkout
+                                                </button>
+                                                <% } %>
+
+                                                    <% if (trip.payment.status=='pending' ) { %>
+                                                        <button type="button" class="btn btn-danger m-1 btn-cancel">
+                                                            Batalkan
+                                                        </button>
+                                                        <% } else { %>
+                                                            <button type="button" disabled
+                                                                class="btn btn-danger m-1 btn-cancel">
+                                                                Batalkan
+                                                            </button>
+                                                            <% } %>
                         </td>
                     </tr>
                     <% } %>
@@ -116,6 +150,44 @@
                 window.location.reload();
             } else {
                 alert('Gagal membatalkan trip!\nerror: ' + response.errors);
+            }
+        });
+    });
+
+    const checkInButtons = document.querySelectorAll('.btn-check-in');
+    checkInButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const tripId = e.target.parentElement.parentElement.children[0].children[0].innerText;
+            const response = await fetch(`/api/trips/${tripId}/check-in`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': getCookie('admin_id')
+                }
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Gagal check in!\nerror: ' + response);
+            }
+        });
+    });
+
+    const checkOutButtons = document.querySelectorAll('.btn-check-out');
+    checkOutButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const tripId = e.target.parentElement.parentElement.children[0].children[0].innerText;
+            const response = await fetch(`/api/trips/${tripId}/check-out`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': getCookie('admin_id')
+                }
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Gagal check out!\nerror: ' + response);
             }
         });
     });

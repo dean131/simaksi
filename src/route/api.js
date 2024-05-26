@@ -41,6 +41,8 @@ router.get("/trips/:id", tripController.get);
 router.get("/trips/:id/generate_pdf", tripController.generatePDF);
 router.post("/trips", tripController.create);
 router.post("/trips/:id/cancel", tripController.cancel);
+router.post("/trips/:id/check-in", tripController.checkIn);
+router.post("/trips/:id/check-out", tripController.checkOut);
 router.post("/trips/confirm-create", tripController.confirmCreate);
 
 // MEMBER ROUTES

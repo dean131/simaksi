@@ -14,6 +14,7 @@ const list = async (req, res, next) => {
 
 const update = async (req, res, next) => {
 	try {
+		console.log(req.body);
 		// Mengambil id route dari parameter
 		const id = parseInt(req.params.id);
 		// Validasi data route
@@ -43,7 +44,7 @@ const update = async (req, res, next) => {
 			data: result.value,
 		});
 		// Mengirimkan data route yang telah diupdate ke client
-		res.json({
+		res.status(200).json({
 			data: route,
 		});
 	} catch (error) {
