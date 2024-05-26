@@ -236,22 +236,17 @@ const cancel = async (req, res, next) => {
 
 const paymentNotification = async (req, res, next) => {
 	try {
-		console.log(`req.body: ${req.body}`);
 		// Mengambil data dari Midtrans
 		const transaction_id = req.body.transaction_id;
 		const transaction_status = req.body.transaction_status;
-		console.log(`transaction_id: ${transaction_id}`);
-		console.log(`transaction_status: ${transaction_status}`);
 		// Mengambil data payment dari database
 		const payment = await prisma.payment.findFirst({
 			where: {
 				transaction_id: transaction_id,
 			},
 		});
-		console.log(`payment: ${payment}`);
 		// Jika payment tidak ditemukan, kirimkan error
 		if (!payment) {
-			console.log("Payment not found");
 			throw new ResponseError(404, "Payment not found");
 		}
 		// Mengupdate status payment
