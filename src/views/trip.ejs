@@ -56,13 +56,15 @@
                                 <span class="badge 
                                 <% if (trip.status === 'dibatalkan') { %>
                                     bg-danger
-                                <% } else if (trip.status === 'belum dimulai') { %>
+                                <% } else if (trip.status === 'menunggu') { %>
                                     bg-warning
-                                <% } else if (trip.status === 'berlangsung') { %>
+                                <% } else if (trip.status === 'aktif') { %>
                                     bg-primary
                                 <% } else if (trip.status === 'selesai') { %>
                                     bg-success 
-                                <% } %> 
+                                <% } else if (trip.status === 'lunas') { %> 
+                                    bg-success
+                                <% } %>
                                     rounded-3 fw-semibold">
                                     <%= trip.status %>
                                 </span>
