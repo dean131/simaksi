@@ -7,8 +7,8 @@ const route = async (req, res) => {
 	if (!route) {
 		route = await prisma.route.create({
 			data: {
-				name: "Merbabu",
-				price: 1000000,
+				name: "Alang-alang Sewu",
+				price: 25000,
 				is_open: true,
 			},
 		});
