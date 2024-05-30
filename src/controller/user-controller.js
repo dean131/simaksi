@@ -3,6 +3,27 @@ import bcrypt from "bcrypt";
 import Joi from "joi";
 import { ResponseError } from "../utils/response-error.js";
 
+async function generateRandomIntId() {
+	function getRandomInt(min, max) {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+
+	while (true) {
+		let id = getRandomInt(100000, 999999);
+		// Cek apakah id sudah digunakan
+		const user = await prisma.user.findFirst({
+			where: {
+				id: id,
+			},
+		});
+		if (!user) {
+			return parseInt(id);
+		}
+	}
+}
+
 const register = async (req, res, next) => {
 	try {
 		// Validasi data yang diterima dari client
@@ -18,7 +39,7 @@ const register = async (req, res, next) => {
 			gender: Joi.string().required(),
 			weight: Joi.number().required(),
 			height: Joi.number().required(),
-			address: Joi.string().max(255).required(),
+			address: Joi.string().max(255),
 		});
 		// Validasi data yang diterima dari client
 		const result = schema.validate(req.body);
@@ -27,10 +48,7 @@ const register = async (req, res, next) => {
 		}
 		// Validasi password dan password_confirm
 		if (req.body.password !== req.body.password_confirm) {
-			throw new ResponseError(
-				400,
-				"Password and password_confirm not match"
-			);
+			throw new ResponseError(400, "Password and password_confirm not match");
 		}
 		// Menghapus password_confirm dari req.body
 		delete result.value.password_confirm;
@@ -46,6 +64,8 @@ const register = async (req, res, next) => {
 		}
 		// Mengenkripsi password
 		result.value.password = await bcrypt.hash(result.value.password, 10);
+		// Generate id user
+		result.value.id = await generateRandomIntId();
 		// Menyimpan data user ke database
 		const user = await prisma.user.create({
 			data: result.value,
@@ -84,10 +104,7 @@ const login = async (req, res, next) => {
 			throw new ResponseError(401, "email or password wrong");
 		}
 		// Mengecek apakah password sesuai
-		const isPasswordValid = await bcrypt.compare(
-			result.value.password,
-			user.password
-		);
+		const isPasswordValid = await bcrypt.compare(result.value.password, user.password);
 		if (!isPasswordValid) {
 			throw new ResponseError(401, "email or password wrong");
 		}
@@ -150,7 +167,7 @@ const update = async (req, res, next) => {
 			gender: Joi.string().required(),
 			weight: Joi.number().required(),
 			height: Joi.number().required(),
-			address: Joi.string().max(255).required(),
+			address: Joi.string().max(255),
 		});
 		// Validasi data yang diterima dari client
 		const result = schema.validate(req.body);

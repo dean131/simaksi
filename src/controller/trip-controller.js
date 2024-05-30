@@ -8,10 +8,25 @@ import path from "path";
 import ejs from "ejs";
 import puppeteer from "puppeteer";
 
-function getRandomInt(min, max) {
-	min = Math.ceil(min);
-	max = Math.floor(max);
-	return Math.floor(Math.random() * (max - min + 1)) + min;
+async function generateRandomIntId() {
+	function getRandomInt(min, max) {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+
+	while (true) {
+		let id = getRandomInt(100000, 999999);
+		// Cek apakah id sudah digunakan
+		const trip = await prisma.trip.findFirst({
+			where: {
+				id: id,
+			},
+		});
+		if (!trip) {
+			return parseInt(id);
+		}
+	}
 }
 
 const generatePDF = async (req, res, next) => {
@@ -48,11 +63,7 @@ const generatePDF = async (req, res, next) => {
 		trip.days = diff / (1000 * 60 * 60 * 24);
 
 		// Merender template invoice.ejs
-		const html = await ejs.renderFile(
-			path.resolve("src/views/invoice.ejs"),
-			{ trip: trip },
-			{ async: true }
-		);
+		const html = await ejs.renderFile(path.resolve("src/views/invoice.ejs"), { trip: trip }, { async: true });
 		const browser = await puppeteer.launch();
 		const page = await browser.newPage();
 		await page.setContent(html);
@@ -107,7 +118,7 @@ const create = async (req, res, next) => {
 		// membuat trip baru
 		const newTrip = await prisma.trip.create({
 			data: {
-				id: getRandomInt(100000, 999999),
+				id: await generateRandomIntId(),
 				user_id: req.user.id,
 				route_id: route.id,
 			},
@@ -241,9 +252,7 @@ const cancel = async (req, res, next) => {
 			throw new ResponseError(400, "Cannot cancel paid trip");
 		}
 		// Cancel payment di Midtrans
-		const response = await coreApi.transaction.cancel(
-			trip.payment.transaction_id
-		);
+		const response = await coreApi.transaction.cancel(trip.payment.transaction_id);
 
 		if (response.status_code !== "200") {
 			throw new ResponseError(500, "Failed to cancel payment");
@@ -397,9 +406,7 @@ const list = async (req, res, next) => {
 			}
 		});
 		// mengecualikan status "none"
-		const tripsWithStatusFiltered = tripsWithStatus.filter(
-			(trip) => trip.status !== "none"
-		);
+		const tripsWithStatusFiltered = tripsWithStatus.filter((trip) => trip.status !== "none");
 		// Mengirimkan data trip ke client
 		res.json({ data: tripsWithStatusFiltered });
 	} catch (error) {
