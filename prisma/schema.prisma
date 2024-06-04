@@ -25,7 +25,6 @@ model User {
   date_of_birth   DateTime
   weight          Float   @db.Float
   height          Float   @db.Float
-  address         String  @db.Text
   
   trips Trip[]
   members Member[]
