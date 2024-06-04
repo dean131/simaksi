@@ -67,7 +67,15 @@ const generatePDF = async (req, res, next) => {
 		const browser = await puppeteer.launch();
 		const page = await browser.newPage();
 		await page.setContent(html);
-		const pdfBuffer = await page.pdf();
+		const pdfBuffer = await page.pdf({
+			format: "A4",
+			margin: {
+				top: "5mm",
+				right: "5mm",
+				bottom: "5mm",
+				left: "5mm",
+			},
+		});
 		await browser.close(); // tutup browser
 
 		res.set("Content-Type", "application/pdf");
