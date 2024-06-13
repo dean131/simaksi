@@ -16,7 +16,7 @@ const route = async (req, res) => {
 
 	return res.render("route", {
 		layout: "main-layout",
-		title: "Trip",
+		title: "Base",
 		route: route,
 	});
 };
