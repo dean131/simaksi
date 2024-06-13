@@ -93,7 +93,7 @@ const payment = async (req, res) => {
 			payment: true,
 		},
 		orderBy: {
-			canceled_at: "desc",
+			created_at: "desc",
 		},
 	});
 
