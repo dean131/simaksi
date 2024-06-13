@@ -1,0 +1,154 @@
+<h5 class="card-title fw-semibold mb-4">Tabel Trip</h5>
+<div class="table-responsive">
+    <!-- model Payment {
+        id              Int           @id @default(autoincrement())
+        status          String        @db.VarChar(15)
+        transaction_id  String        @db.VarChar(100)
+        price           Float
+        expiration      DateTime
+        bank            String        @db.VarChar(20)
+        va_number       String        @db.VarChar(50)
+        trip_id         Int           @unique
+        trip            Trip          @relation(fields: [trip_id], references: [id])
+      
+      } -->
+    <table class="table text-nowrap mb-0 align-middle">
+        <thead class="text-dark fs-4">
+            <tr>
+                <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Id Trip</h6>
+                </th>
+                <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Id Transaksi</h6>
+                </th>
+                <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Harga</h6>
+                </th>
+                <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Kedaluarsa</h6>
+                </th>
+                <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Bank</h6>
+                </th>
+                <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Nomor VA</h6>
+                </th>
+                <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Status</h6>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <% trips.forEach(trip=> { %>
+                <% if (trip && trip.created_at) { %>
+                    <tr>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">
+                                <%= trip.id %>
+                            </h6>
+                        </td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-1">
+                                <%= trip.payment.transaction_id %>
+                            </h6>
+                        </td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-normal mb-1">
+                                <%= trip.payment.price %>
+                            </h6>
+                        </td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-1">
+                                <%= new Date(trip.payment.expiration).toLocaleDateString() %>
+                            </h6>
+                        </td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-1">
+                                <%= trip.payment.bank %>
+                            </h6>
+                        </td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-1">
+                                <%= trip.payment.va_number %>
+                            </h6>
+                        </td>
+                        <td class="border-bottom-0">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge 
+                                    <% if (trip.payment.status === 'cancel') { %>
+                                        bg-danger
+                                    <% } else if (trip.payment.status === 'pending') { %>
+                                        bg-warning
+                                    <% } else if (trip.payment.status === 'settlement') { %>
+                                        bg-success 
+                                    <% } %> 
+                                        rounded-3 fw-semibold">
+                                    <%= trip.payment.status %>
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                    <% } %>
+                        <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const cancelTripButtons = document.querySelectorAll('.btn-cancel');
+    cancelTripButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const tripId = e.target.parentElement.parentElement.children[0].children[0].innerText;
+            const response = await fetch(`/api/trips/${tripId}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': getCookie('admin_id')
+                }
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Gagal membatalkan trip!\nerror: ' + response.errors);
+            }
+        });
+    });
+
+    const checkInButtons = document.querySelectorAll('.btn-check-in');
+    checkInButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const tripId = e.target.parentElement.parentElement.children[0].children[0].innerText;
+            const response = await fetch(`/api/trips/${tripId}/check-in`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': getCookie('admin_id')
+                }
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Gagal check in!\nerror: ' + response);
+            }
+        });
+    });
+
+    const checkOutButtons = document.querySelectorAll('.btn-check-out');
+    checkOutButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const tripId = e.target.parentElement.parentElement.children[0].children[0].innerText;
+            const response = await fetch(`/api/trips/${tripId}/check-out`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': getCookie('admin_id')
+                }
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Gagal check out!\nerror: ' + response);
+            }
+        });
+    });
+</script>

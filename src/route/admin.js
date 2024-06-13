@@ -16,3 +16,4 @@ adminRouter.use(adminMiddleware);
 adminRouter.get("/route", adminController.route);
 adminRouter.get("/trip", adminController.trip);
 adminRouter.get("/checkpoint", adminController.checkpoint);
+adminRouter.get("/payment", adminController.payment);

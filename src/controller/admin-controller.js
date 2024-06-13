@@ -85,6 +85,24 @@ const checkpoint = async (req, res) => {
 	});
 };
 
+const payment = async (req, res) => {
+	const trips = await prisma.trip.findMany({
+		include: {
+			user: true,
+			payment: true,
+		},
+		orderBy: {
+			canceled_at: "desc",
+		},
+	});
+
+	res.render("payment", {
+		layout: "main-layout",
+		title: "Payment",
+		trips: trips,
+	});
+};
+
 const login = async (req, res) => {
 	res.render("login", {
 		layout: "auth-layout",
@@ -161,6 +179,7 @@ export default {
 	trip,
 	route,
 	checkpoint,
+	payment,
 	login,
 	performLogin,
 	logout,
