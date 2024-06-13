@@ -13,7 +13,8 @@ const route = async (req, res) => {
 			},
 		});
 	}
-	res.render("route", {
+
+	return res.render("route", {
 		layout: "main-layout",
 		title: "Trip",
 		route: route,
@@ -67,7 +68,7 @@ const trip = async (req, res) => {
 
 	console.log(tripsWithStatus);
 
-	res.render("trip", {
+	return res.render("trip", {
 		layout: "main-layout",
 		title: "Trip",
 		trips: tripsWithStatus,
@@ -78,7 +79,7 @@ const checkpoint = async (req, res) => {
 	// Mengambil data checkpoint dari database
 	const checkpoints = await prisma.checkPoint.findMany();
 
-	res.render("checkpoint", {
+	return res.render("checkpoint", {
 		layout: "main-layout",
 		title: "Trip",
 		checkpoints: checkpoints,
@@ -96,7 +97,7 @@ const payment = async (req, res) => {
 		},
 	});
 
-	res.render("payment", {
+	return res.render("payment", {
 		layout: "main-layout",
 		title: "Payment",
 		trips: trips,
@@ -104,7 +105,7 @@ const payment = async (req, res) => {
 };
 
 const login = async (req, res) => {
-	res.render("login", {
+	return res.render("login", {
 		layout: "auth-layout",
 	});
 };
