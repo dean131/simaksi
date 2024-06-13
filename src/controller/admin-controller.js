@@ -34,7 +34,7 @@ const trip = async (req, res) => {
 			},
 		},
 		orderBy: {
-			canceled_at: "desc",
+			created_at: "desc",
 		},
 	});
 
