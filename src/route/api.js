@@ -6,7 +6,7 @@ import memberController from "../controller/member-controller.js";
 import routeController from "../controller/route-controller.js";
 import { apiMiddleware } from "../middleware/auth-middleware.js";
 
-import { upload } from "../multer.js";
+import { upload } from "../application/multer.js";
 
 export const router = new express.Router();
 
@@ -19,14 +19,14 @@ router.use(apiMiddleware);
 router.get("/checkpoints", checkpointController.list);
 router.get("/checkpoints/:id", checkpointController.get);
 router.post(
-	"/checkpoints",
-	upload.single("picture"),
-	checkpointController.create
+    "/checkpoints",
+    upload.single("picture"),
+    checkpointController.create
 );
 router.put(
-	"/checkpoints/:id",
-	upload.single("picture"),
-	checkpointController.update
+    "/checkpoints/:id",
+    upload.single("picture"),
+    checkpointController.update
 );
 router.delete("/checkpoints/:id", checkpointController.remove);
 

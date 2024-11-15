@@ -5,20 +5,30 @@ import { errorMiddleware } from "./middleware/error-middleware.js";
 import expressLayouts from "express-ejs-layouts";
 // cookie parser
 import cookieParser from "cookie-parser";
+// Import session
+import session from "express-session";
+// Import flash
+import flash from "express-flash";
 // Import routes
 import { publicRouter } from "./route/public-api.js";
 import { router } from "./route/api.js";
 import { adminRouter } from "./route/admin.js";
 
 // Import Prisma
-const app = express();
+export const app = express();
 
-// MIDDLEWARE
+// MIDDLEWARE\
 app.use(express.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-// body parser
 app.use(express.urlencoded({ extended: true }));
+app.use(
+    session({
+        secret: process.env.APP_SECRET,
+        saveUninitialized: true,
+        resave: false,
+    })
+);
+app.use(flash());
 
 // EJS
 app.set("view engine", "ejs");
@@ -38,6 +48,7 @@ app.use("/admin", adminRouter);
 app.use(errorMiddleware);
 
 // SERVER
-app.listen(3000, () => {
-	console.log("Server is running on http://localhost:3000");
+const APP_PORT = process.env.APP_PORT || 3000;
+app.listen(APP_PORT, () => {
+    console.log(`Server is running on http://localhost:${APP_PORT}`);
 });
