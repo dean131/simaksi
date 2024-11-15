@@ -1,6 +1,6 @@
 import express from "express";
 // Import Middleware
-import { errorMiddleware } from "./middleware/error-middleware.js";
+import { errorMiddleware } from "../middleware/error-middleware.js";
 // Import EJS layout
 import expressLayouts from "express-ejs-layouts";
 // cookie parser
@@ -10,9 +10,9 @@ import session from "express-session";
 // Import flash
 import flash from "express-flash";
 // Import routes
-import { publicRouter } from "./route/public-api.js";
-import { router } from "./route/api.js";
-import { adminRouter } from "./route/admin.js";
+import { publicRouter } from "../route/public-api.js";
+import { router } from "../route/api.js";
+import { adminRouter } from "../route/admin.js";
 
 // Import Prisma
 export const app = express();
@@ -46,9 +46,3 @@ app.use("/admin", adminRouter);
 
 // MIDLEWARE ERROR
 app.use(errorMiddleware);
-
-// SERVER
-const APP_PORT = process.env.APP_PORT || 3000;
-app.listen(APP_PORT, () => {
-    console.log(`Server is running on http://localhost:${APP_PORT}`);
-});

@@ -5,7 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "dev": "nodemon src/main.js",
-    "test": "npx jest test --detectOpenHandles"
+    "test": "jest -i"
   },
   "jest": {
     "transform": {
