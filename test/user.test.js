@@ -22,7 +22,6 @@ describe("POST /api/users/register", function () {
             date_of_birth: new Date(),
             weight: 0,
             height: 0,
-            role: Role.USER,
         });
 
         expect(response.status).toBe(200);
@@ -53,7 +52,6 @@ describe("POST /api/users/register", function () {
             date_of_birth: new Date(),
             weight: 0,
             height: 0,
-            role: Role.USER,
         });
 
         expect(response.status).toBe(400);
@@ -73,7 +71,6 @@ describe("POST /api/users/register", function () {
             date_of_birth: new Date(),
             weight: 0,
             height: 0,
-            role: Role.USER,
         });
 
         expect(response.status).toBe(400);

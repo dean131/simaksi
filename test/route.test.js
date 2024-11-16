@@ -7,10 +7,8 @@ describe("PUT /api/routes/:id", function () {
     let routeId;
 
     beforeAll(async () => {
-        // Create User
         await createTestUser();
 
-        // Create a test route
         const route = await prisma.route.create({
             data: {
                 name: "test",
@@ -22,10 +20,8 @@ describe("PUT /api/routes/:id", function () {
     });
 
     afterAll(async () => {
-        // Remove the test user
         await removeTestUser();
 
-        // Clean up the test route
         await prisma.route.deleteMany({
             where: {
                 name: "test",
@@ -44,10 +40,12 @@ describe("PUT /api/routes/:id", function () {
             });
 
         expect(response.status).toBe(200);
-        expect(response.body.data).toBeDefined();
-        expect(response.body.data.name).toBe("Updated Route");
-        expect(response.body.data.price).toBe(150);
-        expect(response.body.data.is_open).toBe(false);
+        expect(response.body.data).toEqual({
+            id: routeId,
+            name: "Updated Route",
+            price: 150,
+            is_open: false,
+        });
     });
 
     test("update route with invalid data", async () => {
@@ -77,6 +75,34 @@ describe("PUT /api/routes/:id", function () {
             });
 
         expect(response.status).toBe(404);
+        expect(response.body.errors).toBeDefined();
+    });
+});
+
+describe("GET /api/routes", function () {
+    beforeAll(async () => {
+        await createTestUser();
+    });
+
+    afterAll(async () => {
+        await removeTestUser();
+    });
+
+    test("get routes", async () => {
+        const response = await supertest(app)
+            .get("/api/routes")
+            .set("Authorization", "1");
+
+        expect(response.status).toBe(200);
+        expect(response.body.data).toBeDefined();
+    });
+
+    test("get routes with invalid token", async () => {
+        const response = await supertest(app)
+            .get("/api/routes")
+            .set("Authorization", "2");
+
+        expect(response.status).toBe(401);
         expect(response.body.errors).toBeDefined();
     });
 });

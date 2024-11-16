@@ -1,5 +1,10 @@
 import { prisma } from "../application/prisma.js";
 import bcrypt from "bcrypt";
+import Joi from "joi";
+import { WebError } from "../utils/response-error.js";
+import { generateUserId } from "../utils/generate-id.js";
+import { Role } from "@prisma/client";
+import { logger } from "../application/logging.js";
 
 const route = async (req, res) => {
     let route = await prisma.route.findFirst();
@@ -14,10 +19,11 @@ const route = async (req, res) => {
         });
     }
 
-    return res.render("route", {
+    res.render("route", {
         layout: "main-layout",
         title: "Base",
         route: route,
+        user: req.user,
     });
 };
 
@@ -66,12 +72,11 @@ const trip = async (req, res) => {
         }
     });
 
-    console.log(tripsWithStatus);
-
-    return res.render("trip", {
+    res.render("trip", {
         layout: "main-layout",
         title: "Trip",
         trips: tripsWithStatus,
+        user: req.user,
     });
 };
 
@@ -79,10 +84,11 @@ const checkpoint = async (req, res) => {
     // Mengambil data checkpoint dari database
     const checkpoints = await prisma.checkPoint.findMany();
 
-    return res.render("checkpoint", {
+    res.render("checkpoint", {
         layout: "main-layout",
         title: "Trip",
         checkpoints: checkpoints,
+        user: req.user,
     });
 };
 
@@ -97,106 +103,147 @@ const payment = async (req, res) => {
         },
     });
 
-    return res.render("payment", {
+    res.render("payment", {
         layout: "main-layout",
         title: "Payment",
         trips: trips,
+        user: req.user,
     });
 };
 
-const login = async (req, res) => {
-    return res.render("login", {
-        layout: "auth-layout",
+const login = async (req, res, next) => {
+    res.render("auth/login", {
+        layout: "auth/auth-layout",
     });
 };
 
-const performLogin = async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        req.flash("error", "Email atau password salah");
-        return res.redirect("/admin/login");
-    }
-
-    // Mengecek apakah email dan password sesuai
-    const admin = await prisma.admin.findUnique({
-        where: {
-            email: email,
-        },
-    });
-
-    if (!admin) {
-        req.flash("error", "Email atau password salah");
-        return res.redirect("/admin/login");
-    }
-
-    // Mengecek apakah password sesuai
-    const isPasswordValid = await bcrypt.compare(password, admin.password);
-    if (!isPasswordValid) {
-        req.flash("error", "Email atau password salah");
-        return res.redirect("/admin/login");
-    }
-
-    if (admin) {
-        res.cookie("admin_id", admin.id);
-        req.flash("success", "Selamat datang, ");
-        return res.redirect("/admin/route");
-    } else {
-        return res.redirect("/admin/login");
-    }
-};
-
-const register = async (req, res) => {
-    return res.render("register", {
-        layout: "auth-layout",
-    });
-};
-
-const performRegister = async (req, res) => {
+const performLogin = async (req, res, next) => {
     try {
-        const { email, password, name, phone } = req.body;
+        const schema = Joi.object({
+            email: Joi.string().email().max(100).required(),
+            password: Joi.string().max(100).required(),
+        });
 
-        if (!email || !password || !name || !phone) {
-            req.flash("error", "Email atau password tidak boleh kosong");
-            return res.redirect("/admin/register");
+        const result = schema.validate(req.body);
+        if (result.error) {
+            throw new WebError(400, result.error.message, "/admin/login");
         }
 
-        const isEmailExist = await prisma.admin.findFirst({
+        const { email, password } = result.value;
+
+        // Mengecek apakah email dan password sesuai
+        const user = await prisma.user.findUnique({
             where: {
                 email: email,
             },
         });
 
-        if (isEmailExist) {
-            req.flash("error", "Email sudah terdaftar");
-            return res.redirect("/admin/register");
+        if (!user) {
+            throw new WebError(
+                401,
+                "Email atau password salah",
+                "/admin/login"
+            );
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const admin = await prisma.admin.create({
-            data: {
-                email: email,
-                password: hashedPassword,
-                name: name,
-                phone: phone,
-            },
-        });
-
-        if (admin) {
-            req.flash("success", "Berhasil mendaftar");
-            return res.redirect("/admin/login");
+        // Mengecek apakah password sesuai
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            throw new WebError(
+                401,
+                "Email atau password salah",
+                "/admin/login"
+            );
         }
+
+        res.cookie("admin_id", user.id);
+        req.flash(`success", "Selamat datang, ${user.name}`);
+        res.redirect("/admin/route");
     } catch (error) {
-        console.log(error);
-        req.flash("error", "Gagal mendaftar");
-        return res.redirect("/admin/register");
+        next(error);
     }
 };
 
-const logout = async (req, res) => {
-    res.clearCookie("admin_id");
-    return res.redirect("/admin/login");
+const register = async (req, res) => {
+    res.render("auth/register", {
+        layout: "auth/auth-layout",
+    });
+};
+
+const performRegister = async (req, res, next) => {
+    try {
+        const schema = Joi.object({
+            national_id: Joi.string().max(30).required(),
+            email: Joi.string().email().max(100).required(),
+            password: Joi.string().max(100).required(),
+            password_confirm: Joi.string().max(100).required(),
+            name: Joi.string().max(100).required(),
+            phone: Joi.string().max(20).required(),
+            emergency_phone: Joi.string().max(20).required(),
+            date_of_birth: Joi.date().required(),
+            gender: Joi.string().required(),
+            weight: Joi.number().required(),
+            height: Joi.number().required(),
+            address: Joi.string().max(255),
+        });
+
+        const validated = schema.validate(req.body);
+        if (validated.error) {
+            throw new WebError(400, validated.error.message, "/admin/register");
+        }
+
+        if (validated.value.password !== validated.value.password_confirm) {
+            throw new WebError(
+                400,
+                "Password dan Konfirmasi Password tidak sama",
+                "/admin/register"
+            );
+        }
+
+        const hashedPassword = await bcrypt.hash(validated.value.password, 10);
+
+        validated.value.password = hashedPassword;
+        delete validated.value.password_confirm;
+        validated.value.id = await generateUserId();
+        validated.value.role = Role.ADMIN;
+
+        const countExistEmail = await prisma.user.count({
+            where: {
+                email: validated.value.email,
+            },
+        });
+
+        if (countExistEmail > 0) {
+            throw new WebError(400, "Email sudah terdaftar", "/admin/register");
+        }
+
+        try {
+            await prisma.user.create({
+                data: validated.value,
+            });
+        } catch (error) {
+            throw new WebError(
+                500,
+                "Terjadi Kesalahan saat melakukan pendaftaran",
+                "/admin/register"
+            );
+        }
+
+        req.flash("success", "Berhasil mendaftar");
+        res.redirect("/admin/login");
+    } catch (error) {
+        next(error);
+    }
+};
+
+const logout = async (req, res, next) => {
+    try {
+        res.clearCookie("admin_id");
+        req.flash("success", "Berhasil logout");
+        res.redirect("/admin/login");
+    } catch (error) {
+        next(error);
+    }
 };
 
 export default {

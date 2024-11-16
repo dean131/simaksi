@@ -1,0 +1,76 @@
+<div class="row justify-content-center w-100">
+  <div class="col-md-8 col-lg-6 col-xxl-3">
+
+    <%- include('../partials/flash-messages') %>
+
+    <div class="card mb-0">
+      <div class="card-body">
+        <a class="text-nowrap logo-img text-center d-block py-3 w-100">
+          <!-- <img src="/public/images/logos/dark-logo.svg" width="180" alt=""> -->
+          <span class="brand">Alang-alang Sewu</span>
+        </a>
+        <p class="text-center">Daftar</p>
+        <form action="/admin/register" method="post">
+          <div class="mb-3">
+            <label for="exampleInputNatioalId" class="form-label">NIK</label>
+            <input type="text" class="form-control" id="exampleInputNatioalId" aria-describedby="textHelp" name="national_id" required>
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputtext1" class="form-label">Nama</label>
+            <input type="text" class="form-control" id="exampleInputtext1" aria-describedby="textHelp" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Email</label>
+            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="email" required>
+          </div>
+          <div class="mb-4">
+            <label for="exampleInputPassword1" class="form-label">Password</label>
+            <input type="password" class="form-control" id="exampleInputPassword1" name="password" required>
+          </div>
+          <div class="mb-4">
+            <label for="exampleInputPassword2" class="form-label">Konfirmasi Password</label>
+            <input type="password" class="form-control" id="exampleInputPassword2" name="password_confirm" required>
+          </div>
+          <div class="mb-4">
+            <label for="exampleInputPhone" class="form-label">Nomor Telpon</label>
+            <input type="number" class="form-control" id="exampleInputPhone" name="phone" required>
+          </div>
+          <div class="mb-4">
+            <label for="exampleInputEmergencyPhone" class="form-label">Nomor Telpon Darurat</label>
+            <input type="number" class="form-control" id="exampleInputEmergencyPhone" name="emergency_phone" required>
+          </div>
+          <div class="mb-4">
+            <label for="dateOfBirth" class="form-label">Tanggal Lahir</label>
+            <input type="date" class="form-control" id="dateOfBirth" name="date_of_birth" required>
+          </div>
+          <div class="mb-4">
+            <select class="form-select" name="gender" required>
+              <option selected value="">Jenis Kelamin</option>
+              <option value="male">Laki-laki</option>
+              <option value="female">Perempuan</option>
+            </select>
+          </div>
+          <div class="row mb-4">
+            <div class="col">
+              <label for="weight" class="form-label">Tinggi Badan</label>
+              <input type="number" id="height" name="height" class="form-control" required>
+            </div>
+            <div class="col">
+              <label for="weight" class="form-label">Berat Badan</label>
+              <input type="number" id="weight" name="weight" class="form-control" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="exampleFormControlTextarea1" class="form-label">Alamat</label>
+            <textarea class="form-control" id="exampleFormControlTextarea1" name="address" rows="3" required></textarea>
+          </div>
+          <button class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2">Daftar</button>
+          <div class="d-flex align-items-center justify-content-center">
+            <p class="fs-4 mb-0 fw-bold">Sudah punya akun?</p>
+            <a class="text-primary fw-bold ms-2" href="/admin/login">Login</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

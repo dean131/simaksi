@@ -1,8 +1,16 @@
 class ResponseError extends Error {
-	constructor(status, message) {
-		super(message);
-		this.status = status;
-	}
+    constructor(status, message) {
+        super(message);
+        this.status = status;
+    }
 }
 
-export { ResponseError };
+class WebError extends Error {
+    constructor(status, message, redirectTo) {
+        super(message);
+        this.status = status;
+        this.redirectTo = redirectTo;
+    }
+}
+
+export { ResponseError, WebError };

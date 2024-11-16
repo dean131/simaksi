@@ -1,29 +1,40 @@
-<%- include('flash-messages') %>
+<%- include('partials/flash-messages') %>
 
-<h5 class="card-title fw-semibold mb-4">
-  Data Route
-</h5>
+<div class="card">
+  <h3 class="card-header fw-semibold mb-4">
+    Data Rute
+  </h3>
+  <div class="card-body">
+    <div class="row">
+      <div class="col">
+        <form id="formRoute">
+          <div class="mb-3">
+            <label for="inputName" class="form-label">Nama Route</label>
+            <input type="text" class="form-control" id="inputName" aria-describedby="emailHelp" value="<%= route.name %>">
+          </div>
+          <div class="mb-3">
+            <label for="inputPrice" class="form-label">Harga</label>
+            <input type="number" class="form-control" id="inputPrice" value="<%= route.price %>" <%= user.role === 'ADMIN' ? 'disabled' : '' %>>
+          </div>
+          <div class="mb-3">
+            <label for="selectIsopen" class="form-label">Status</label>
+            <select class="form-select" id="selectIsopen" aria-label="Default select example">
+              <option value="true">Buka</option>
+              <option value="false">Tutup</option>
+            </select>
+          </div>
+          <div class="d-grid mb-3">
+            <button type="submit" class="btn block btn-primary">Ubah</button>
+          </div>
+        </form>
+      </div>
+      <div class="col d-none d-md-block">
+        <img class="w-100" src="/public/images/backgrounds/1.jpg" alt="some image">
+      </div>
+    </div>
+  </div>
+</div>
 
-<form id="formRoute">
-  <div class="col-lg-6 mb-3">
-    <label for="inputName" class="form-label">Nama Route</label>
-    <input type="text" class="form-control" id="inputName" aria-describedby="emailHelp" value="<%= route.name %>">
-  </div>
-  <div class="col-lg-6 mb-3">
-    <label for="inputPrice" class="form-label">Harga</label>
-    <input type="number" class="form-control" id="inputPrice" value="<%= route.price %>">
-  </div>
-  <div class="col-lg-6 mb-3">
-    <label for="selectIsopen" class="form-label">Status</label>
-    <select class="form-select" id="selectIsopen" aria-label="Default select example">
-      <option value="true">Buka</option>
-      <option value="false">Tutup</option>
-    </select>
-  </div>
-  <div class="col-lg-6 d-grid mb-3">
-    <button type="submit" class="btn block btn-primary">Ubah</button>
-  </div>
-</form>
 
 <script>
   document.getElementById('selectIsopen').value = '<%= route.is_open %>';

@@ -1,4 +1,5 @@
 import { prisma } from "../application/prisma.js";
+import { logger } from "../application/logging.js";
 
 export const apiMiddleware = async (req, res, next) => {
     const id = parseInt(req.get("Authorization"));
@@ -10,7 +11,7 @@ export const apiMiddleware = async (req, res, next) => {
     });
 
     if (!user) {
-        console.log("Unauthorized: User not found");
+        logger.error("Unauthorized");
         res.status(401)
             .json({
                 errors: "Unauthorized",
@@ -24,18 +25,18 @@ export const apiMiddleware = async (req, res, next) => {
 
 export const adminMiddleware = async (req, res, next) => {
     if (!req.cookies["admin_id"]) {
-        console.log("Admin Unauthorized: No admin_id cookie found");
+        logger.error("Admin Unauthorized: admin_id cookie not found");
         return res.redirect("/admin/login");
     }
 
-    const user = prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
         where: {
-            id: req.cookies.user_id,
+            id: parseInt(req.cookies.admin_id),
         },
     });
 
     if (!user) {
-        console.log("Admin Unauthorized: User not found");
+        logger.error("Admin Unauthorized: Invalid admin_id cookie");
         return res.redirect("/admin/login");
     }
 

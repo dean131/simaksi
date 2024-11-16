@@ -2,28 +2,8 @@ import { prisma } from "../application/prisma.js";
 import bcrypt from "bcrypt";
 import Joi from "joi";
 import { ResponseError } from "../utils/response-error.js";
+import { generateUserId } from "../utils/generate-id.js";
 import { Role } from "@prisma/client";
-
-async function generateRandomIntId() {
-    function getRandomInt(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    while (true) {
-        let id = getRandomInt(100000, 999999);
-        // Cek apakah id sudah digunakan
-        const user = await prisma.user.findFirst({
-            where: {
-                id: id,
-            },
-        });
-        if (!user) {
-            return parseInt(id);
-        }
-    }
-}
 
 const register = async (req, res, next) => {
     try {
@@ -41,7 +21,6 @@ const register = async (req, res, next) => {
             weight: Joi.number().required(),
             height: Joi.number().required(),
             address: Joi.string().max(255),
-            role: Joi.string(),
         });
         // Validasi data yang diterima dari client
         const result = schema.validate(req.body);
@@ -49,7 +28,7 @@ const register = async (req, res, next) => {
             throw new ResponseError(400, result.error.message);
         }
         // Validasi password dan password_confirm
-        if (req.body.password !== req.body.password_confirm) {
+        if (result.value.password !== result.value.password_confirm) {
             throw new ResponseError(
                 400,
                 "Password and password_confirm not match"
@@ -57,6 +36,8 @@ const register = async (req, res, next) => {
         }
         // Menghapus password_confirm dari req.body
         delete result.value.password_confirm;
+        // Menambahkan role user
+        result.value.role = Role.USER;
         // Mengecek apakah email dan national_id sudah terdaftar
         const countUser = await prisma.user.count({
             where: {
@@ -71,13 +52,13 @@ const register = async (req, res, next) => {
             },
         });
         // Jika email sudah terdaftar, maka kirimkan error
-        if (countUser >= 1) {
+        if (countUser > 0) {
             throw new ResponseError(400, "Email or national_id already exist");
         }
         // Mengenkripsi password
         result.value.password = await bcrypt.hash(result.value.password, 10);
         // Generate id user
-        result.value.id = await generateRandomIntId();
+        result.value.id = await generateUserId();
         // Menyimpan data user ke database
         const user = await prisma.user.create({
             data: result.value,
