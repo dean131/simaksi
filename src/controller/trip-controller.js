@@ -7,6 +7,7 @@ import moment from "moment-timezone";
 import path from "path";
 import ejs from "ejs";
 import puppeteer from "puppeteer";
+import { Role } from "@prisma/client";
 
 async function generateRandomIntId() {
     function getRandomInt(min, max) {
@@ -327,102 +328,96 @@ const paymentNotification = async (req, res, next) => {
 const list = async (req, res, next) => {
     try {
         // mengambil data filter dari query
-        const status = req.query.status ? req.query.status : "all";
-        console.log(status);
+        const status = req.query.status || "all";
         const orderByParam = req.query.order === "terbaru" ? "desc" : "asc";
+
+        const isAdmin =
+            req.user.role === Role.ADMIN || req.user.role === Role.SUPER_ADMIN;
+
         // Menentukan query berdasarkan status
-        let query = {};
+        const baseQuery = isAdmin ? {} : { user_id: req.user.id };
+        let statusQuery = {};
+
         switch (status) {
             case "menunggu":
-                query = {
-                    user_id: req.user.id,
+                statusQuery = {
                     checked_in_at: null,
                     checked_out_at: null,
                     canceled_at: null,
-                    created_at: { not: null },
-                    payment: {
-                        status: "pending",
-                    },
+                    payment: { status: "pending" },
                 };
                 break;
             case "lunas":
-                query = {
-                    user_id: req.user.id,
+                statusQuery = {
                     checked_in_at: null,
                     checked_out_at: null,
                     canceled_at: null,
-                    created_at: { not: null },
-                    payment: {
-                        status: "settlement",
-                    },
+                    payment: { status: "settlement" },
                 };
                 break;
             case "aktif":
-                query = {
-                    user_id: req.user.id,
+                statusQuery = {
                     checked_in_at: { not: null },
                     checked_out_at: null,
                     canceled_at: null,
-                    created_at: { not: null },
                 };
                 break;
             case "selesai":
-                query = {
-                    user_id: req.user.id,
+                statusQuery = {
                     checked_in_at: { not: null },
                     checked_out_at: { not: null },
                     canceled_at: null,
-                    created_at: { not: null },
                 };
                 break;
             case "ditolak":
-                query = {
-                    user_id: req.user.id,
+                statusQuery = {
                     checked_in_at: null,
                     checked_out_at: null,
                     canceled_at: { not: null },
-                    created_at: { not: null },
                 };
                 break;
             default:
-                query = {
-                    user_id: req.user.id,
-                };
+                // Jika "all", gunakan baseQuery saja tanpa filter tambahan
+                break;
         }
+
+        // Menggabungkan query dasar dengan statusQuery jika diperlukan
+        const query = {
+            ...baseQuery,
+            ...statusQuery,
+            created_at: { not: null },
+        };
+
         // Mengambil data trip dari database
         const trips = await prisma.trip.findMany({
             where: query,
-            orderBy: {
-                created_at: orderByParam,
-            },
-            include: {
-                payment: true,
-            },
+            orderBy: { created_at: orderByParam },
+            include: { payment: true },
         });
-        // tambah status ke data trip
+
+        // Menambah status ke data trip
         const tripsWithStatus = trips.map((trip) => {
-            if (trip.canceled_at) {
-                return { ...trip, status: "dibatalkan" };
-            } else if (trip.checked_out_at) {
-                return { ...trip, status: "selesai" };
-            } else if (trip.checked_in_at) {
-                return { ...trip, status: "aktif" };
-            } else if (trip.payment) {
-                if (trip.payment.status === "settlement") {
-                    return { ...trip, status: "lunas" };
-                } else if (trip.payment.status === "pending") {
-                    return { ...trip, status: "menunggu" };
-                } else {
-                    return { ...trip, status: "none" };
-                }
-            } else {
-                return { ...trip, status: "none" };
+            let status = "none";
+            if (trip.canceled_at) status = "dibatalkan";
+            else if (trip.checked_out_at) status = "selesai";
+            else if (trip.checked_in_at) status = "aktif";
+            else if (trip.payment) {
+                status =
+                    trip.payment.status === "settlement"
+                        ? "lunas"
+                        : trip.payment.status === "pending"
+                        ? "menunggu"
+                        : "none";
             }
+
+            return { ...trip, status };
         });
-        // mengecualikan status "none"
+
+        // Mengecualikan trip dengan status "none"
         const tripsWithStatusFiltered = tripsWithStatus.filter(
             (trip) => trip.status !== "none"
         );
+
         // Mengirimkan data trip ke client
         res.json({ data: tripsWithStatusFiltered });
     } catch (error) {
@@ -541,6 +536,53 @@ const checkOut = async (req, res, next) => {
     }
 };
 
+const scanHandler = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const trip = await prisma.trip.findUnique({
+            where: {
+                id: id,
+            },
+        });
+
+        if (!trip) {
+            throw new ResponseError(404, "Trip not found");
+        }
+
+        if (trip.canceled_at !== null) {
+            throw new ResponseError(400, "Trip has been canceled");
+        }
+
+        if (trip.checked_in_at && trip.checked_out_at) {
+            throw new ResponseError(400, "Trip has been completed");
+        }
+
+        if (trip.checked_in_at && !trip.checked_out_at) {
+            await prisma.trip.update({
+                where: {
+                    id: id,
+                },
+                data: {
+                    checked_out_at: new Date(),
+                },
+            });
+            res.json({ message: "Check out success" });
+        } else {
+            await prisma.trip.update({
+                where: {
+                    id: id,
+                },
+                data: {
+                    checked_in_at: new Date(),
+                },
+            });
+            res.json({ message: "Check in success" });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
 export default {
     generatePDF,
     create,
@@ -548,6 +590,7 @@ export default {
     cancel,
     checkIn,
     checkOut,
+    scanHandler,
     paymentNotification,
     list,
     get,

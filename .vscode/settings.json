@@ -5,4 +5,5 @@
     "[html]": {
         "editor.defaultFormatter": "j69.ejs-beautify"
     },
+    "liveServer.settings.port": 5576,
 }

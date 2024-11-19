@@ -24,7 +24,7 @@ describe("PUT /api/routes/:id", function () {
 
         await prisma.route.deleteMany({
             where: {
-                name: "test",
+                name: "Updated Route",
             },
         });
     });

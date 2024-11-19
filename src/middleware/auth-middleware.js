@@ -25,7 +25,6 @@ export const apiMiddleware = async (req, res, next) => {
 
 export const adminMiddleware = async (req, res, next) => {
     if (!req.cookies["admin_id"]) {
-        logger.error("Admin Unauthorized: admin_id cookie not found");
         return res.redirect("/admin/login");
     }
 
@@ -36,7 +35,6 @@ export const adminMiddleware = async (req, res, next) => {
     });
 
     if (!user) {
-        logger.error("Admin Unauthorized: Invalid admin_id cookie");
         return res.redirect("/admin/login");
     }
 

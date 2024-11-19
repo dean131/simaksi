@@ -28,54 +28,9 @@ const route = async (req, res) => {
 };
 
 const trip = async (req, res) => {
-    // Mengambil data trip dari database
-    const trips = await prisma.trip.findMany({
-        include: {
-            user: true,
-            payment: true,
-            members: {
-                include: {
-                    user: true,
-                },
-            },
-        },
-        orderBy: {
-            created_at: "desc",
-        },
-    });
-
-    const tripsWithStatus = trips.map((trip) => {
-        // ubah fromat waktu
-        if (trip.created_at) {
-            trip.start_date = trip.start_date.toLocaleDateString("id-ID", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-            });
-            trip.end_date = trip.end_date.toLocaleDateString("id-ID", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-            });
-        }
-        // Tambahkan atribut "status" berdasarkan kondisi
-        if (trip.canceled_at) {
-            return { ...trip, status: "dibatalkan" };
-        } else if (trip.checked_out_at) {
-            return { ...trip, status: "selesai" };
-        } else if (trip.checked_in_at) {
-            return { ...trip, status: "aktif" };
-        } else if (trip.payment && trip.payment.status === "settlement") {
-            return { ...trip, status: "lunas" };
-        } else if (trip.payment && trip.payment.status === "pending") {
-            return { ...trip, status: "menunggu" };
-        }
-    });
-
     res.render("trip", {
         layout: "main-layout",
         title: "Trip",
-        trips: tripsWithStatus,
         user: req.user,
     });
 };
@@ -93,20 +48,20 @@ const checkpoint = async (req, res) => {
 };
 
 const payment = async (req, res) => {
-    const trips = await prisma.trip.findMany({
-        include: {
-            user: true,
-            payment: true,
-        },
-        orderBy: {
-            created_at: "desc",
-        },
-    });
+    // const trips = await prisma.trip.findMany({
+    //     include: {
+    //         user: true,
+    //         payment: true,
+    //     },
+    //     orderBy: {
+    //         created_at: "desc",
+    //     },
+    // });
 
     res.render("payment", {
         layout: "main-layout",
         title: "Payment",
-        trips: trips,
+        // trips: trips,
         user: req.user,
     });
 };
@@ -236,6 +191,14 @@ const performRegister = async (req, res, next) => {
     }
 };
 
+const showScan = async (req, res) => {
+    res.render("scan", {
+        layout: "main-layout",
+        title: "Scan",
+        user: req.user,
+    });
+};
+
 const logout = async (req, res, next) => {
     try {
         res.clearCookie("admin_id");
@@ -256,4 +219,5 @@ export default {
     logout,
     register,
     performRegister,
+    showScan,
 };

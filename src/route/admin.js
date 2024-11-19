@@ -17,3 +17,4 @@ adminRouter.get("/route", adminController.route);
 adminRouter.get("/trip", adminController.trip);
 adminRouter.get("/checkpoint", adminController.checkpoint);
 adminRouter.get("/payment", adminController.payment);
+adminRouter.get("/scan", adminController.showScan);

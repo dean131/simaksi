@@ -7,12 +7,11 @@
   <title>
     <%= title %>
   </title>
-  <link rel="shortcut icon" type="image/png" href="/public/images/logos/favicon.png" />
+  <link rel="shortcut icon" href="/public/images/logos/favicon.ico" />
   <link rel="stylesheet" href="/public/css/styles.min.css" />
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+  <%- typeof styles !== 'undefined' ? styles : '' %>
+
   <style>
     .brand {
       font-size: x-large;
@@ -42,7 +41,7 @@
           <ul id="sidebarnav">
             <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-              <span class="hide-menu">Master Data</span>
+              <span class="hide-menu">Menu</span>
             </li>
             <li class="sidebar-item">
               <a class="sidebar-link" href="/admin/route" aria-expanded="false">
@@ -68,6 +67,14 @@
                 <span class="hide-menu">Pos</span>
               </a>
             </li> -->
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="/admin/scan" aria-expanded="false">
+                <span>
+                  <i class="ti ti-article"></i>
+                </span>
+                <span class="hide-menu">Scan Trip</span>
+              </a>
+            </li>
             <li class="sidebar-item">
               <a class="sidebar-link" href="/admin/payment" aria-expanded="false">
                 <span>
@@ -134,10 +141,7 @@
   <script src="/public/libs/apexcharts/dist/apexcharts.min.js"></script>
   <script src="/public/libs/simplebar/dist/simplebar.js"></script>
   <script src="/public/js/dashboard.js"></script>
-  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-  <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 
   <script>
     // Function to get a specific cookie by name
@@ -147,6 +151,8 @@
       if (parts.length === 2) return parts.pop().split(';').shift();
     }
   </script>
+
+  <%- typeof scripts !== 'undefined' ? scripts : '' %>
 </body>
 
 </html>

@@ -4,6 +4,7 @@ import userContoller from "../controller/user-controller.js";
 import tripController from "../controller/trip-controller.js";
 import memberController from "../controller/member-controller.js";
 import routeController from "../controller/route-controller.js";
+import paymentController from "../controller/payment-controller.js";
 import { apiMiddleware } from "../middleware/auth-middleware.js";
 
 import { upload } from "../application/multer.js";
@@ -43,6 +44,7 @@ router.post("/trips", tripController.create);
 router.post("/trips/:id/cancel", tripController.cancel);
 router.post("/trips/:id/check-in", tripController.checkIn);
 router.post("/trips/:id/check-out", tripController.checkOut);
+router.post("/trips/:id/scan", tripController.scanHandler);
 router.post("/trips/confirm-create", tripController.confirmCreate);
 
 // MEMBER ROUTES
@@ -53,3 +55,6 @@ router.delete("/members/:id", memberController.remove);
 // ROUTE ROUTES
 router.get("/routes", routeController.list);
 router.put("/routes/:id", routeController.update);
+
+// PAYMENT ROUTES
+router.get("/payments", paymentController.list);

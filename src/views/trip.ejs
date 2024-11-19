@@ -1,143 +1,114 @@
-<h5 class="card-title fw-semibold mb-4">Tabel Trip</h5>
-<div class="table-responsive">
-  <table class="table text-nowrap mb-0 align-middle">
-    <thead class="text-dark fs-4">
-      <tr>
-        <th class="border-bottom-0">
-          <h6 class="fw-semibold mb-0">Id</h6>
-        </th>
-        <th class="border-bottom-0">
-          <h6 class="fw-semibold mb-0">User</h6>
-        </th>
-        <th class="border-bottom-0">
-          <h6 class="fw-semibold mb-0">Tanggal</h6>
-        </th>
-        <th class="border-bottom-0">
-          <h6 class="fw-semibold mb-0">Status</h6>
-        </th>
-        <th class="border-bottom-0">
-          <h6 class="fw-semibold mb-0">Status Pembayaran</h6>
-        </th>
-        <th class="border-bottom-0">
-          <h6 class="fw-semibold mb-0">Anggota</h6>
-        </th>
-        <th class="border-bottom-0">
-          <h6 class="fw-semibold mb-0">Aksi</h6>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <% trips.forEach(trip=> { %>
-      <% if (trip && trip.created_at) { %>
-      <tr>
-        <td class="border-bottom-0">
-          <h6 class="fw-semibold mb-0">
-            <%= trip.id %>
-          </h6>
-        </td>
-        <td class="border-bottom-0">
-          <h6 class="fw-semibold mb-1">
-            <%= trip.user.name %>
-          </h6>
-          <span class="fw-normal">
-            <%= trip.user.phone %>
-          </span>
-        </td>
-        <td class="border-bottom-0">
-          <h6 class="fw-normal mb-1">
-            <%= trip.start_date %>
-          </h6>
-          <h6 class="fw-normal mb-1">
-            sampai
-          </h6>
-          <h6 class="fw-normal">
-            <%= trip.end_date %>
-          </h6>
-        </td>
-        <td class="border-bottom-0">
-          <div class="d-flex align-items-center gap-2">
-            <span class="badge 
-                                <% if (trip.status === 'dibatalkan') { %>
-                                    bg-danger
-                                <% } else if (trip.status === 'menunggu') { %>
-                                    bg-warning
-                                <% } else if (trip.status === 'aktif') { %>
-                                    bg-primary
-                                <% } else if (trip.status === 'selesai') { %>
-                                    bg-success 
-                                <% } else if (trip.status === 'lunas') { %> 
-                                    bg-success
-                                <% } %>
-                                    rounded-3 fw-semibold">
-              <%= trip.status %>
-            </span>
-          </div>
-        </td>
-        <td class="border-bottom-0">
-          <div class="d-flex align-items-center gap-2">
-            <span class="badge 
-                                    <% if (trip.payment.status === 'cancel') { %>
-                                        bg-danger
-                                    <% } else if (trip.payment.status === 'pending') { %>
-                                        bg-warning
-                                    <% } else if (trip.payment.status === 'settlement') { %>
-                                        bg-success 
-                                    <% } %> 
-                                        rounded-3 fw-semibold">
-              <%= trip.payment.status %>
-            </span>
-          </div>
-        </td>
-        <td class="border-bottom-0">
-          <% trip.members.forEach(member=> { %>
-          <h6 class="fw-semibold mb-1">
-            - <%= member.user.name %>
-          </h6>
-          <% }) %>
-        </td>
-        <td class="border-bottom-0">
-          <% if (trip.status=="lunas" ) { %>
-          <button type="button" class="btn btn-info m-1 btn-check-in">
-            Checkin
-          </button>
-          <% } else { %>
-          <button type="button" disabled class="btn btn-info m-1 btn-check-in">
-            Checkin
-          </button>
-          <% } %>
-
-          <% if (trip.status=="aktif" ) { %>
-          <button type="button" class="btn btn-info m-1 btn-check-out">
-            Checkout
-          </button>
-          <% } else { %>
-          <button type="button" disabled class="btn btn-info m-1 btn-check-out">
-            Checkout
-          </button>
-          <% } %>
-
-          <% if (trip.status=='menunggu' ) { %>
-          <button type="button" class="btn btn-danger m-1 btn-cancel">
-            Batalkan
-          </button>
-          <% } else { %>
-          <button type="button" disabled class="btn btn-danger m-1 btn-cancel">
-            Batalkan
-          </button>
-          <% } %>
-        </td>
-      </tr>
-      <% } %>
-      <% }) %>
-    </tbody>
-  </table>
+<div class="card">
+  <h3 class="card-header fw-semibold mb-4">
+    Data Trip
+  </h3>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table id="tripsTable" class="display">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Checked In</th>
+            <th>Checked Out</th>
+            <th>Status</th>
+            <th>Route ID</th>
+            <th>User ID</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
+<% scripts = `
 <script>
-  const cancelTripButtons = document.querySelectorAll('.btn-cancel');
-  cancelTripButtons.forEach(button => {
-    button.addEventListener('click', async (e) => {
-      const tripId = e.target.parentElement.parentElement.children[0].children[0].innerText;
+    $(document).ready(function() {
+        $('#tripsTable').DataTable({
+            ajax: {
+                url: '/api/trips',
+                type: 'GET',
+                headers: {
+                'Authorization': getCookie('admin_id')
+                },
+            },
+            columns: [
+                {
+                    data: 'id'
+                },
+                {
+                    data: 'start_date',
+                    render: function(data) {
+                        return new Date(data).toLocaleString();
+                    }
+                },
+                {
+                    data: 'end_date',
+                    render: function(data) {
+                        return new Date(data).toLocaleString();
+                    }
+                },
+                {
+                    data: 'checked_in_at',
+                    render: function(data) {
+                        return data ? new Date(data).toLocaleString() : 'N/A';
+                    }
+                },
+                {
+                    data: 'checked_out_at',
+                    render: function(data) {
+                        return data ? new Date(data).toLocaleString() : 'N/A';
+                    }
+                },
+                {
+                    data: 'status',
+                    render: function(data) {
+                        if (data === 'dibatalkan') {
+                            return '<span class="badge bg-danger">Dibatalkan</span>';
+                        } else if (data === 'selesai') {
+                            return '<span class="badge bg-success">Selesai</span>';
+                        } else if (data === 'aktif') {
+                            return '<span class="badge bg-primary">Aktif</span>';
+                        } else if (data === 'lunas') {
+                            return '<span class="badge bg-info">Lunas</span>';
+                        } else if (data === 'menunggu') {
+                            return '<span class="badge bg-warning">Menunggu</span>';
+                        } else {
+                            return '<span class="badge bg-secondary">Tidak diketahui</span>';
+                        }
+                    }
+                },
+                {
+                    data: 'route_id'
+                },
+                {
+                    data: 'user_id'
+                },
+                {
+                    data: 'id',
+                    render: function(data) {
+                        return '<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">' +
+                            '<button type="button" class="btn btn-sm btn-outline-danger btn-cancel" data-id="' + data + '">Batal</button>' +
+                            '<button type="button" class="btn btn-sm btn-outline-primary btn-check-in" data-id="' + data + '">In</button>' +
+                            '<button type="button" class="btn btn-sm btn-outline-success btn-check-out" data-id="' + data + '">Out</button>' +
+                            '</div>';
+                    }
+                }
+            ],
+        });
+    });
+
+</script>
+` %>
+
+<script>
+  document.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('btn-cancel')) {
+      const tripId = e.target.dataset.id;
       const response = await fetch(`/api/trips/${tripId}/cancel`, {
         method: 'POST',
         headers: {
@@ -150,13 +121,12 @@
       } else {
         alert('Gagal membatalkan trip!\nerror: ' + response.errors);
       }
-    });
-  });
+    }
+  })
 
-  const checkInButtons = document.querySelectorAll('.btn-check-in');
-  checkInButtons.forEach(button => {
-    button.addEventListener('click', async (e) => {
-      const tripId = e.target.parentElement.parentElement.children[0].children[0].innerText;
+  document.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('btn-check-in')) {
+      const tripId = e.target.dataset.id;
       const response = await fetch(`/api/trips/${tripId}/check-in`, {
         method: 'POST',
         headers: {
@@ -169,13 +139,12 @@
       } else {
         alert('Gagal check in!\nerror: ' + response);
       }
-    });
+    }
   });
 
-  const checkOutButtons = document.querySelectorAll('.btn-check-out');
-  checkOutButtons.forEach(button => {
-    button.addEventListener('click', async (e) => {
-      const tripId = e.target.parentElement.parentElement.children[0].children[0].innerText;
+  document.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('btn-check-out')) {
+      const tripId = e.target.dataset.id;
       const response = await fetch(`/api/trips/${tripId}/check-out`, {
         method: 'POST',
         headers: {
@@ -188,6 +157,6 @@
       } else {
         alert('Gagal check out!\nerror: ' + response);
       }
-    });
+    }
   });
 </script>

@@ -1,0 +1,2 @@
+INSERT INTO User (id, national_id, email, name, password, phone, emergency_phone, gender, date_of_birth, weight, height, role, address) VALUES
+(1, '1234567890123456', 'user1@example.com', 'John Doe', 'password1', '081234567890', '081298765432', 'Male', '1990-01-01 00:00:00', 70.5, 175.0, 'user', '123 Main Street, Cityville');
