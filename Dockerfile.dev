@@ -1,0 +1,48 @@
+# Use Node.js LTS image as base
+FROM node:20
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies for Puppeteer and build tools
+RUN apt-get update && apt-get install -y \
+    libgconf-2-4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libgdk-pixbuf2.0-0 \
+    libgtk-3-0 \
+    libnss3 \
+    libx11-xcb1 \
+    libxss1 \
+    libasound2 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxi6 \
+    libxtst6 \
+    libgbm1 \
+    fonts-liberation \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies and rebuild bcrypt
+RUN rm -rf node_modules
+RUN npm install
+RUN npm rebuild bcrypt --build-from-source
+
+# Copy project files
+COPY . .
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Expose port
+EXPOSE 3000
+
+# Start the application
+CMD ["npm", "run", "dev"]
