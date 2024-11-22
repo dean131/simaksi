@@ -532,6 +532,10 @@ const scanHandler = async (req, res, next) => {
             throw new ResponseError(404, "Trip not found");
         }
 
+        if (trip.payment.status !== "settlement") {
+            throw new ResponseError(400, "Payment not settled");
+        }
+
         if (trip.canceled_at !== null) {
             throw new ResponseError(400, "Trip has been canceled");
         }
