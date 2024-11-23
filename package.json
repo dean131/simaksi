@@ -13,6 +13,9 @@
       "^.+\\.[t|j]sx?$": "babel-jest"
     }
   },
+  "prisma": {
+  "seed": "node ./prisma/seed.js"
+},
   "author": "",
   "license": "ISC",
   "type": "module",
