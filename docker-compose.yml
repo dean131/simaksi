@@ -17,8 +17,7 @@ services:
     networks:
       - simaksi_network
     command: >
-      sh -c "npx prisma migrate deploy &&
-             npm run dev"
+      sh -c "npx prisma migrate deploy && npm run dev"
 
   db_simaksi:
     container_name: db_simaksi
