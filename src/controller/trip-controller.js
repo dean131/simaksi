@@ -8,27 +8,7 @@ import path from "path";
 import ejs from "ejs";
 import puppeteer from "puppeteer";
 import { Role } from "@prisma/client";
-
-async function generateRandomIntId() {
-    function getRandomInt(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    while (true) {
-        let id = getRandomInt(100000, 999999);
-        // Cek apakah id sudah digunakan
-        const trip = await prisma.trip.findFirst({
-            where: {
-                id: id,
-            },
-        });
-        if (!trip) {
-            return parseInt(id);
-        }
-    }
-}
+import { generateRandomTripId } from "../utils/generate-id.js";
 
 const generatePDF = async (req, res, next) => {
     try {
@@ -65,11 +45,17 @@ const generatePDF = async (req, res, next) => {
 
         // Merender template invoice.ejs
         const html = await ejs.renderFile(
-            path.resolve("src/views/invoice.ejs"),
-            { trip: trip },
+            path.resolve("src/views/partials/invoice.ejs"),
+            {
+                trip: trip,
+                backgroundImagePath: "/public/images/backgrounds/rocket.jpg",
+            },
             { async: true }
         );
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ["--no-sandbox", "--disable-setuid-sandbox"], // Tambahkan opsi ini
+        });
         const page = await browser.newPage();
         await page.setContent(html);
         const pdfBuffer = await page.pdf({
@@ -81,7 +67,7 @@ const generatePDF = async (req, res, next) => {
                 left: "5mm",
             },
         });
-        await browser.close(); // tutup browser
+        await browser.close();
 
         res.set("Content-Type", "application/pdf");
         res.send(pdfBuffer);
@@ -131,7 +117,7 @@ const create = async (req, res, next) => {
         // membuat trip baru
         const newTrip = await prisma.trip.create({
             data: {
-                id: await generateRandomIntId(),
+                id: await generateRandomTripId(),
                 user_id: req.user.id,
                 route_id: route.id,
             },
@@ -547,6 +533,10 @@ const scanHandler = async (req, res, next) => {
 
         if (!trip) {
             throw new ResponseError(404, "Trip not found");
+        }
+
+        if (trip.payment.status !== "settlement") {
+            throw new ResponseError(400, "Payment not settled");
         }
 
         if (trip.canceled_at !== null) {

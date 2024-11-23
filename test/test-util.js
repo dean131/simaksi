@@ -11,7 +11,7 @@ export const removeTestUser = async () => {
 };
 
 export const createTestUser = async () => {
-    await prisma.user.create({
+    return await prisma.user.create({
         data: {
             id: 1,
             national_id: "111111",
@@ -29,10 +29,21 @@ export const createTestUser = async () => {
     });
 };
 
-export const getTestUser = async () => {
-    return prisma.user.findUnique({
+export const createTestRoute = async () => {
+    return await prisma.route.create({
+        data: {
+            id: 1,
+            name: "test",
+            price: 10,
+            is_open: true,
+        },
+    });
+};
+
+export const removeTestRoute = async () => {
+    await prisma.route.deleteMany({
         where: {
-            email: "test",
+            name: "test",
         },
     });
 };
