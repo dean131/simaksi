@@ -27,80 +27,112 @@
 
 <% scripts = `
 <script>
-    $(document).ready(function() {
-        $('#tripsTable').DataTable({
-            ajax: {
-                url: '/api/trips',
-                type: 'GET',
-                headers: {
-                'Authorization': getCookie('admin_id')
-                },
-            },
-            columns: [
-                {
-                    data: 'id'
-                },
-                {
-                    data: 'start_date',
-                    render: function(data) {
-                        return new Date(data).toLocaleString();
-                    }
-                },
-                {
-                    data: 'end_date',
-                    render: function(data) {
-                        return new Date(data).toLocaleString();
-                    }
-                },
-                {
-                    data: 'checked_in_at',
-                    render: function(data) {
-                        return data ? new Date(data).toLocaleString() : 'N/A';
-                    }
-                },
-                {
-                    data: 'checked_out_at',
-                    render: function(data) {
-                        return data ? new Date(data).toLocaleString() : 'N/A';
-                    }
-                },
-                {
-                    data: 'status',
-                    render: function(data) {
-                        if (data === 'dibatalkan') {
-                            return '<span class="badge bg-danger">Dibatalkan</span>';
-                        } else if (data === 'selesai') {
-                            return '<span class="badge bg-success">Selesai</span>';
-                        } else if (data === 'aktif') {
-                            return '<span class="badge bg-primary">Aktif</span>';
-                        } else if (data === 'lunas') {
-                            return '<span class="badge bg-info">Lunas</span>';
-                        } else if (data === 'menunggu') {
-                            return '<span class="badge bg-warning">Menunggu</span>';
-                        } else {
-                            return '<span class="badge bg-secondary">Tidak diketahui</span>';
-                        }
-                    }
-                },
-                {
-                    data: 'route_id'
-                },
-                {
-                    data: 'user_id'
-                },
-                {
-                    data: 'id',
-                    render: function(data) {
-                        return '<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">' +
-                            '<button type="button" class="btn btn-sm btn-outline-danger btn-cancel" data-id="' + data + '">Batal</button>' +
-                            '<button type="button" class="btn btn-sm btn-outline-primary btn-check-in" data-id="' + data + '">In</button>' +
-                            '<button type="button" class="btn btn-sm btn-outline-success btn-check-out" data-id="' + data + '">Out</button>' +
-                            '</div>';
-                    }
-                }
-            ],
-        });
+  $(document).ready(function() {
+    // Initialize DataTable
+    $('#tripsTable').DataTable({
+      ajax: {
+        url: '/api/trips',
+        type: 'GET',
+        headers: {
+          'Authorization': getCookie('admin_id')
+        },
+      },
+      columns: [
+        {
+          data: 'id'
+        },
+        {
+          data: 'start_date',
+          render: function(data) {
+            return new Date(data).toLocaleString();
+          }
+        },
+        {
+          data: 'end_date',
+          render: function(data) {
+            return new Date(data).toLocaleString();
+          }
+        },
+        {
+          data: 'checked_in_at',
+          render: function(data) {
+            return data ? new Date(data).toLocaleString() : 'N/A';
+          }
+        },
+        {
+          data: 'checked_out_at',
+          render: function(data) {
+            return data ? new Date(data).toLocaleString() : 'N/A';
+          }
+        },
+        {
+          data: 'status',
+          render: function(data) {
+            if (data === 'dibatalkan') {
+              return '<span class="badge bg-danger">Dibatalkan</span>';
+            } else if (data === 'selesai') {
+              return '<span class="badge bg-success">Selesai</span>';
+            } else if (data === 'aktif') {
+              return '<span class="badge bg-primary">Aktif</span>';
+            } else if (data === 'lunas') {
+              return '<span class="badge bg-info">Lunas</span>';
+            } else if (data === 'menunggu') {
+              return '<span class="badge bg-warning">Menunggu</span>';
+            } else {
+              return '<span class="badge bg-secondary">Tidak diketahui</span>';
+            }
+          }
+        },
+        {
+          data: 'route_id'
+        },
+        {
+          data: 'user_id'
+        },
+        {
+          data: 'id',
+          render: function(data, type, row) {
+            const { status, checked_in_at, checked_out_at } = row; // Access status directly from the row data
+
+            // Disable buttons based on status
+            let cancelBtnDisabled = false;
+            let checkInBtnDisabled = false;
+            let checkOutBtnDisabled = false;
+
+            // Apply button disabling logic based on status
+            if (status === 'dibatalkan') {
+              cancelBtnDisabled = true;
+              checkInBtnDisabled = true;
+              checkOutBtnDisabled = true;
+            } else if (status === 'aktif') {
+              cancelBtnDisabled = true;  // "Batal" should be disabled when status is "aktif"
+              checkInBtnDisabled = true; // "Check-in" should be disabled when status is "aktif"
+              checkOutBtnDisabled = false; // Only "Check-out" is enabled when status is "aktif"
+            } else if (status === 'menunggu') {
+              cancelBtnDisabled = false;
+              checkInBtnDisabled = true;
+              checkOutBtnDisabled = true;
+            } else if (status === 'selesai') {
+              cancelBtnDisabled = true;
+              checkInBtnDisabled = true;
+              checkOutBtnDisabled = true;
+            } else if (status === 'lunas') {
+              cancelBtnDisabled = true;
+              checkInBtnDisabled = checked_in_at ? true : false; // If already checked in, disable Check-in
+              checkOutBtnDisabled = true; // Cannot check out after payment is settled
+            }
+
+            // Return buttons with appropriate disabled attributes
+            return '<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">' +
+              '<button type="button" class="btn btn-sm btn-outline-danger btn-cancel" data-id="' + data + '" ' + (cancelBtnDisabled ? 'disabled' : '') + '>Batal</button>' +
+              '<button type="button" class="btn btn-sm btn-outline-primary btn-check-in" data-id="' + data + '" ' + (checkInBtnDisabled ? 'disabled' : '') + '>In</button>' +
+              '<button type="button" class="btn btn-sm btn-outline-success btn-check-out" data-id="' + data + '" ' + (checkOutBtnDisabled ? 'disabled' : '') + '>Out</button>' +
+              '</div>';
+          }
+        }
+      ],
     });
+  });
 
 </script>
 ` %>
