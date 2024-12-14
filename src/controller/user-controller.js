@@ -148,14 +148,33 @@ const get = async (req, res, next) => {
     }
 };
 
+const list = async (req, res, next) => {
+    try {
+        // Mencari semua user
+        const users = await prisma.user.findMany();
+        // Menghapus password dari user
+        users.forEach((user) => {
+            delete user.password;
+        });
+        // Mengirimkan data user ke client
+        res.json({ data: users });
+    } catch (error) {
+        // Mengirimkan error ke middleware error handler
+        next(error);
+    }
+};
+
 const update = async (req, res, next) => {
     try {
         // Mengambil id user dari request params
         const id = parseInt(req.params.id);
+
         // Validasi data yang diterima dari client
         const schema = Joi.object({
             national_id: Joi.string().max(30).required(),
             email: Joi.string().email().max(100).required(),
+            password: Joi.string().max(100).allow(null, ""),
+            password_confirm: Joi.string().max(100).allow(null, ""),
             name: Joi.string().max(100).required(),
             phone: Joi.string().max(20).required(),
             emergency_phone: Joi.string().max(20).required(),
@@ -165,22 +184,46 @@ const update = async (req, res, next) => {
             height: Joi.number().required(),
             address: Joi.string().max(255),
         });
+
         // Validasi data yang diterima dari client
         const result = schema.validate(req.body);
-        // Jika validasi gagal, kirimkan error
         if (result.error) {
             throw new ResponseError(400, result.error.message);
         }
+
         // Mencari user berdasarkan id
         const isUserExist = await prisma.user.findFirst({
             where: {
                 id: id,
             },
         });
-        // Jika user tidak ditemukan, kirimkan error
+
         if (!isUserExist) {
             throw new ResponseError(404, "User not found");
         }
+
+        // Handling password update logic
+        if (result.value.password) {
+            if (result.value.password !== result.value.password_confirm) {
+                throw new ResponseError(
+                    400,
+                    "Password and password_confirm do not match"
+                );
+            }
+
+            // Encrypting password if provided
+            result.value.password = await bcrypt.hash(
+                result.value.password,
+                10
+            );
+        } else {
+            // Remove password field from update data if not provided
+            delete result.value.password;
+        }
+
+        // Always remove password_confirm field
+        delete result.value.password_confirm;
+
         // Update data user
         const user = await prisma.user.update({
             where: {
@@ -188,10 +231,28 @@ const update = async (req, res, next) => {
             },
             data: result.value,
         });
-        // Menghapus password dari user
+
+        // Menghapus password dari user object sebelum dikirim ke client
         delete user.password;
-        // Mengirimkan data user ke client
+
         res.json({ data: user });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const remove = async (req, res, next) => {
+    try {
+        // Mengambil id user dari request params
+        const id = parseInt(req.params.id);
+        // Menghapus user berdasarkan id
+        await prisma.user.delete({
+            where: {
+                id: id,
+            },
+        });
+        // Mengirimkan pesan ke client
+        res.json({ message: "User deleted" });
     } catch (error) {
         // Mengirimkan error ke middleware error handler
         next(error);
@@ -201,8 +262,10 @@ const update = async (req, res, next) => {
 // Export controller
 export default {
     get,
+    list,
     update,
     register,
     login,
     logout,
+    remove,
 };

@@ -1,0 +1,103 @@
+<%- include('../partials/flash-messages') %>
+<div class="card">
+  <h3 class="card-header fw-semibold">
+    Data Users
+  </h3>
+  <div class="card-body">
+    <div class="d-flex justify-content-start mb-4">
+      <a href="/admin/users/add" class="btn btn-primary">Tambah Pengguna</a>
+    </div>
+    <div class="table-responsive">
+      <table id="usersTable" class="display">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nama</th>
+            <th>NIK</th>
+            <th>Email</th>
+            <th>Telephone</th>
+            <th>Alamat</th>
+            <th>Gender</th>
+            <th>Role</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<% scripts = `
+<script>
+$(document).ready(function() {
+    // Initialize DataTable
+    $('#usersTable').DataTable({
+        ajax: {
+            url: '/api/users',
+            type: 'GET',
+            headers: {
+                'Authorization': getCookie('admin_id')
+            },
+        },
+        columns: [{
+                data: 'id'
+            },
+            {
+                data: 'name'
+            },
+            {
+                data: 'national_id'
+            },
+            {
+                data: 'email'
+            },
+            {
+                data: 'phone'
+            },
+            {
+                data: 'address'
+            },
+            {
+                data: 'gender'
+            },
+            {
+                data: 'role'
+            },
+            {
+                data: 'id',
+                render: function(data, type, row) {
+                    return '<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">' +
+                        '<a href="/admin/users/' + data + '/edit" class="btn btn-sm btn-outline-primary btn-edit" data-id="' + data + '" ' + '>Edit</a>' +
+                        '<button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="' + data + '" ' + '>Hapus</button>' +
+                        '</div>';
+                }
+            }
+        ],
+    });
+});
+</script>
+` %>
+
+<script>
+  document.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('btn-delete')) {
+      const userId = e.target.dataset.id;
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': getCookie('admin_id')
+        }
+      });
+      if (response.ok) {
+        alert('Berhasil hapus user!');
+        window.location.reload();
+      } else {
+        alert('Gagal hapus user!\nerror: ' + response);
+      }
+    }
+  });
+</script>

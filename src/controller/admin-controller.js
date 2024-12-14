@@ -119,13 +119,33 @@ const performLogin = async (req, res, next) => {
     }
 };
 
-const register = async (req, res) => {
-    res.render("auth/register", {
-        layout: "auth/auth-layout",
+const showScan = async (req, res) => {
+    res.render("scan", {
+        layout: "main-layout",
+        title: "Scan",
+        user: req.user,
     });
 };
 
-const performRegister = async (req, res, next) => {
+const users = async (req, res) => {
+    const users = await prisma.user.findMany();
+
+    res.render("user/index", {
+        layout: "main-layout",
+        title: "Users",
+        user: req.user,
+    });
+};
+
+const addUser = async (req, res) => {
+    res.render("user/add", {
+        layout: "main-layout",
+        title: "Add User",
+        user: req.user,
+    });
+};
+
+const storeUser = async (req, res, next) => {
     try {
         const schema = Joi.object({
             national_id: Joi.string().max(30).required(),
@@ -144,14 +164,18 @@ const performRegister = async (req, res, next) => {
 
         const validated = schema.validate(req.body);
         if (validated.error) {
-            throw new WebError(400, validated.error.message, "/admin/register");
+            throw new WebError(
+                400,
+                validated.error.message,
+                "/admin/users/add"
+            );
         }
 
         if (validated.value.password !== validated.value.password_confirm) {
             throw new WebError(
                 400,
                 "Password dan Konfirmasi Password tidak sama",
-                "/admin/register"
+                "/admin/users/add"
             );
         }
 
@@ -169,7 +193,22 @@ const performRegister = async (req, res, next) => {
         });
 
         if (countExistEmail > 0) {
-            throw new WebError(400, "Email sudah terdaftar", "/admin/register");
+            throw new WebError(
+                400,
+                "Email sudah terdaftar",
+                "/admin/users/add"
+            );
+        }
+
+        // Handling national_id existence
+        const countExistNationalId = await prisma.user.count({
+            where: {
+                national_id: validated.value.national_id,
+            },
+        });
+
+        if (countExistNationalId > 0) {
+            throw new WebError(400, "NIK sudah terdaftar", "/admin/users/add");
         }
 
         try {
@@ -180,23 +219,131 @@ const performRegister = async (req, res, next) => {
             throw new WebError(
                 500,
                 "Terjadi Kesalahan saat melakukan pendaftaran",
-                "/admin/register"
+                "/admin/users/add"
             );
         }
 
-        req.flash("success", "Berhasil mendaftar");
-        res.redirect("/admin/login");
+        req.flash("success", "Berhasil menambahkan user");
+        res.redirect("/admin/users");
     } catch (error) {
         next(error);
     }
 };
 
-const showScan = async (req, res) => {
-    res.render("scan", {
+const editUser = async (req, res) => {
+    const id = parseInt(req.params.id);
+    const user = await prisma.user.findFirst({
+        where: {
+            id: id,
+        },
+    });
+    res.render("user/edit", {
         layout: "main-layout",
-        title: "Scan",
+        title: "Edit User",
+        editUser: user,
         user: req.user,
     });
+};
+
+const updateUser = async (req, res, next) => {
+    try {
+        // Mengambil id user dari request params
+        const id = parseInt(req.params.id);
+
+        // Validasi data yang diterima dari client
+        const schema = Joi.object({
+            national_id: Joi.string().max(30).required(),
+            email: Joi.string().email().max(100).required(),
+            password: Joi.string().max(100).allow(null, ""),
+            password_confirm: Joi.string().max(100).allow(null, ""),
+            name: Joi.string().max(100).required(),
+            phone: Joi.string().max(20).required(),
+            emergency_phone: Joi.string().max(20).required(),
+            date_of_birth: Joi.date().required(),
+            gender: Joi.string().required(),
+            weight: Joi.number().required(),
+            height: Joi.number().required(),
+            address: Joi.string().max(255),
+        });
+
+        // Validasi data yang diterima dari client
+        const result = schema.validate(req.body);
+        if (result.error) {
+            throw new WebError(
+                400,
+                result.error.message,
+                `/admin/users/${id}/edit`
+            );
+        }
+
+        // Mencari user berdasarkan id
+        const isUserExist = await prisma.user.findFirst({
+            where: {
+                id: id,
+            },
+        });
+
+        if (!isUserExist) {
+            throw new WebError(404, "Pengguna tidak ditemukan", "/admin/users");
+        }
+
+        // Handling national_id update logic
+        const isNationalIdExist = await prisma.user.findFirst({
+            where: {
+                national_id: result.value.national_id,
+                id: {
+                    not: id,
+                },
+            },
+        });
+
+        if (isNationalIdExist) {
+            throw new WebError(
+                400,
+                "NIK sudah terdaftar",
+                `/admin/users/${id}/edit`
+            );
+        }
+
+        // Handling password update logic
+        if (result.value.password) {
+            if (result.value.password !== result.value.password_confirm) {
+                throw new WebError(
+                    400,
+                    "Password dan password_confirm tidak sama",
+                    `/admin/users/${id}/edit`
+                );
+            }
+
+            // Encrypting password if provided
+            result.value.password = await bcrypt.hash(
+                result.value.password,
+                10
+            );
+        } else {
+            // Remove password field from update data if not provided
+            delete result.value.password;
+        }
+
+        // Always remove password_confirm field
+        delete result.value.password_confirm;
+
+        // Update data user
+        const user = await prisma.user.update({
+            where: {
+                id: id,
+            },
+            data: result.value,
+        });
+
+        // Menghapus password dari user object sebelum dikirim ke client
+        delete user.password;
+
+        req.flash("success", "Berhasil mengubah data user");
+        res.redirect("/admin/users");
+    } catch (error) {
+        next(error);
+    }
 };
 
 const logout = async (req, res, next) => {
@@ -210,6 +357,12 @@ const logout = async (req, res, next) => {
 };
 
 export default {
+    users,
+    addUser,
+    editUser,
+    storeUser,
+    updateUser,
+
     trip,
     route,
     checkpoint,
@@ -217,7 +370,7 @@ export default {
     login,
     performLogin,
     logout,
-    register,
-    performRegister,
+    // register,
+    // performRegister,
     showScan,
 };

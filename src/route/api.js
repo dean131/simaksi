@@ -32,8 +32,10 @@ router.put(
 router.delete("/checkpoints/:id", checkpointController.remove);
 
 // USER ROUTES
+router.get("/users", userContoller.list);
 router.get("/users/:id", userContoller.get);
 router.put("/users/:id", userContoller.update);
+router.delete("/users/:id", userContoller.remove);
 router.post("/users/logout", userContoller.logout);
 
 // TRIP ROUTES

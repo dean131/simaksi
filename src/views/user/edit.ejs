@@ -1,0 +1,65 @@
+<%- include('../partials/flash-messages') %>
+<div class="card">
+  <h3 class="card-header fw-semibold mb-4">
+    Edit Pengguna
+  </h3>
+  <div class="card-body">
+
+    <form id="userForm" action="/admin/users/<%= editUser.id %>/update" method="post">
+      <div class="mb-3">
+        <label for="exampleInputNatioalId" class="form-label">NIK</label>
+        <input type="number" class="form-control" id="exampleInputNatioalId" name="national_id" value="<%= editUser.national_id || '' %>" required>
+      </div>
+      <div class="mb-3">
+        <label for="exampleInputtext1" class="form-label">Nama</label>
+        <input type="text" class="form-control" id="exampleInputtext1" name="name" value="<%= editUser.name || '' %>" required>
+      </div>
+      <div class="mb-3">
+        <label for="exampleInputEmail1" class="form-label">Email</label>
+        <input type="email" class="form-control" id="exampleInputEmail1" name="email" value="<%= editUser.email || '' %>" required>
+      </div>
+      <div class="mb-4">
+        <label for="exampleInputPassword1" class="form-label">Password</label>
+        <input type="password" class="form-control" id="exampleInputPassword1" name="password">
+      </div>
+      <div class="mb-4">
+        <label for="exampleInputPassword2" class="form-label">Konfirmasi Password</label>
+        <input type="password" class="form-control" id="exampleInputPassword2" name="password_confirm">
+      </div>
+      <div class="mb-4">
+        <label for="exampleInputPhone" class="form-label">Nomor Telpon</label>
+        <input type="number" class="form-control" id="exampleInputPhone" name="phone" value="<%= editUser.phone || '' %>" required>
+      </div>
+      <div class="mb-4">
+        <label for="exampleInputEmergencyPhone" class="form-label">Nomor Telpon Darurat</label>
+        <input type="number" class="form-control" id="exampleInputEmergencyPhone" name="emergency_phone" value="<%= editUser.emergency_phone || '' %>" required>
+      </div>
+      <div class="mb-4">
+        <label for="dateOfBirth" class="form-label">Tanggal Lahir</label>
+        <input type="date" class="form-control" id="dateOfBirth" name="date_of_birth" value="<%= editUser.date_of_birth ? new Date(editUser.date_of_birth).toISOString().split('T')[0] : '' %>" required>
+      </div>
+      <div class="mb-4">
+        <select class="form-select" id="gender" name="gender" required>
+          <option value="" <%= !editUser.gender ? 'selected' : '' %>>Jenis Kelamin</option>
+          <option value="male" <%= editUser.gender === 'male' ? 'selected' : '' %>>Laki-laki</option>
+          <option value="female" <%= editUser.gender === 'female' ? 'selected' : '' %>>Perempuan</option>
+        </select>
+      </div>
+      <div class="row mb-4">
+        <div class="col">
+          <label for="height" class="form-label">Tinggi Badan</label>
+          <input type="number" id="height" name="height" class="form-control" value="<%= editUser.height || '' %>" required>
+        </div>
+        <div class="col">
+          <label for="weight" class="form-label">Berat Badan</label>
+          <input type="number" id="weight" name="weight" class="form-control" value="<%= editUser.weight || '' %>" required>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="exampleFormControlTextarea1" class="form-label">Alamat</label>
+        <textarea class="form-control" id="exampleFormControlTextarea1" name="address" rows="3" required><%= editUser.address || '' %></textarea>
+      </div>
+      <button class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2">Simpan</button>
+    </form>
+  </div>
+</div>
