@@ -113,7 +113,13 @@ const performLogin = async (req, res, next) => {
 
         res.cookie("admin_id", user.id);
         req.flash(`success", "Selamat datang, ${user.name}`);
-        res.redirect("/admin/route");
+
+        // Redirect to Route page if user is SUPER_ADMIN
+        if (user.role === Role.SUPER_ADMIN) {
+            res.redirect("/admin/route");
+        } else {
+            res.redirect("/admin/trip");
+        }
     } catch (error) {
         next(error);
     }

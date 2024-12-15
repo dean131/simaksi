@@ -17,6 +17,18 @@
       font-size: x-large;
       font-weight: bold;
     }
+
+    button:disabled,
+    .btn:disabled {
+      background-color: #e0e0e0 !important;
+      /* Warna abu-abu */
+      border-color: #d6d6d6 !important;
+      /* Border abu-abu */
+      color: #a8a8a8 !important;
+      /* Teks abu-abu */
+      cursor: not-allowed !important;
+      /* Cursor tidak aktif */
+    }
   </style>
 </head>
 
@@ -44,7 +56,7 @@
               <span class="hide-menu">Menu</span>
             </li>
             <li class="sidebar-item">
-              <a class="sidebar-link" href="/admin/route" aria-expanded="false">
+              <a class="sidebar-link sidebar-route" href="/admin/route" aria-expanded="false">
                 <span>
                   <i class="ti ti-tent"></i>
                 </span>
@@ -59,7 +71,7 @@
                 <span class="hide-menu">Trip</span>
               </a>
             </li>
-            <li class="sidebar-item">
+            <li class="sidebar-item sidebar-users">
               <a class="sidebar-link" href="/admin/users" aria-expanded="false">
                 <span>
                   <i class="ti ti-users"></i>
@@ -150,6 +162,18 @@
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);
       if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    // Hide sidebar route and users for role ADMIN
+    const role = '<%= user.role %>';
+    if (role === 'ADMIN') {
+      document.querySelector('.sidebar-route').style.display = 'none';
+      document.querySelector('.sidebar-users').style.display = 'none';
+    }
+
+    // redirect to /admin/trip if user role is ADMIN
+    if (role === 'ADMIN' && window.location.pathname === '/admin') {
+      window.location.href = '/admin/trip';
     }
   </script>
 

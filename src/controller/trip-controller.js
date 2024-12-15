@@ -378,7 +378,14 @@ const list = async (req, res, next) => {
         const trips = await prisma.trip.findMany({
             where: query,
             orderBy: { created_at: orderByParam },
-            include: { payment: true },
+            include: {
+                payment: true,
+                members: {
+                    include: {
+                        user: true,
+                    },
+                },
+            },
         });
 
         // Menambah status ke data trip
@@ -396,7 +403,10 @@ const list = async (req, res, next) => {
                         : "none";
             }
 
-            return { ...trip, status };
+            // Ubah members menjadi array nama
+            const memberNames = trip.members.map((member) => member.user.name);
+
+            return { ...trip, members: memberNames, status };
         });
 
         // Mengecualikan trip dengan status "none"

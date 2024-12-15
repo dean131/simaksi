@@ -13,7 +13,7 @@
             <th>Checked In</th>
             <th>Checked Out</th>
             <th>Status</th>
-            <th>Route ID</th>
+            <th>Anggota</th>
             <th>User ID</th>
             <th>Aksi</th>
           </tr>
@@ -84,7 +84,14 @@
           }
         },
         {
-          data: 'route_id'
+          data: 'members',
+          render: function(data) {
+            if (data && data.length > 0) {
+              // Render data as an unordered list
+              return '<ul>' + data.map(name => '<li>' + name + '</li>').join('') + '</ul>';
+            }
+            return '<span class="text-muted">No Members</span>'; // Default message if no members
+          }
         },
         {
           data: 'user_id'
