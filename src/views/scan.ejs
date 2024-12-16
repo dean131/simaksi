@@ -43,18 +43,24 @@
   const getQRBoxSize = () => {
     const width = document.getElementById('reader').offsetWidth;
     return {
-      width: Math.min(width, 600),
-      height: Math.min(width, 600)
+      width: Math.min(width, 720), // Minimal ukuran yang cukup besar
+      height: Math.min(width, 720)
     };
   };
 
   const createScanner = () => {
     return new Html5QrcodeScanner("reader", {
-      fps: 10,
+      fps: 30,
       qrbox: getQRBoxSize(),
       aspectRatio: 1,
       videoConstraints: {
-        facingMode: "environment"
+        facingMode: "environment",
+        width: {
+          ideal: 1280
+        }, // Resolusi lebih tinggi
+        height: {
+          ideal: 720
+        }
       }
     });
   };
